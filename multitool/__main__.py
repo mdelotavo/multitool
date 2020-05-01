@@ -101,6 +101,7 @@ def inout(input, output):
         output.write(chunk)
 
 @cli.command()
+# @cli.command(context_settings={"ignore_unknown_options": True})
 @click.argument('filename', type=click.Path(exists=True, dir_okay=False, file_okay=True, resolve_path=False))
 def touch(filename):
     """Print FILENAME if the file exists."""
@@ -256,6 +257,14 @@ def validate_rolls(ctx, param, value):
 def roll(rolls):
     click.echo('Rolling a %d-sided dice %d time(s)' % rolls)
 
+@cli.command()
+@click.argument('src', nargs=-1, type=click.Path(exists=True))
+@click.argument('dst', nargs=1, type=click.Path(exists=True, dir_okay=True, file_okay=False))
+def copy(src, dst):
+    """Move file SRC to DST."""
+    for fn in src:
+        click.echo('move %s to folder %s' % (fn, dst))
+
 def main():
     cli(prog_name=APP)
     cli.add_command(initdb)
@@ -283,6 +292,7 @@ def main():
     cli.add_command(perform)
     cli.add_command(chmod)
     cli.add_command(roll)
+    cli.add_command(copy)
 
 
 if __name__ == '__main__':
