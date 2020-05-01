@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 # __main__.py
 
+import codecs
+import os
 import re
 import requests
+import sys
 
 import click
 
@@ -49,7 +52,15 @@ def cli():
 def initdb():
     click.echo('Initialized the database')
 
+def abort_if_false(ctx, param, value):
+    if not value:
+        ctx.abort()
+
 @cli.command()
+# @click.option('--yes', is_flag=True, callback=abort_if_false,
+#               expose_value=False,
+#               prompt='Are you sure you want to drop the db?')
+@click.confirmation_option(prompt='Are you sure you want to drop the db?')
 def dropdb():
     click.echo('Dropped the database')
 
@@ -145,6 +156,106 @@ class BasedIntParamType(click.ParamType):
 def convert(string):
     click.echo(string)
 
+@cli.command()
+@click.option('--item', type=(str, int))
+# @click.option('--item', nargs=2, type=click.Tuple([str, int]))
+def putitem(item):
+    click.echo('name=%s id=%d' % item)
+
+@cli.command()
+@click.option('--message', '-m', multiple=True, default=["foo", "bar"], show_default=True)
+def commit(message):
+    click.echo('\n'.join(message))
+
+@cli.command()
+@click.option('-v', '--verbose', count=True)
+def log(verbose):
+    click.echo('Verbosity: %s' % verbose)
+
+# @cli.command()
+# @click.option('/debug;/no-debug')
+# def log(debug):
+#     click.echo('debug=%s' % debug)
+
+@cli.command()
+@click.option('--shout/--no-shout', ' /-S', default=False)
+def info(shout):
+    rv = sys.platform
+    if shout:
+        rv = rv.upper() + '!!!!111'
+    click.echo(rv)
+
+@cli.command()
+@click.option('--upper', 'transformation', flag_value='upper',
+              default=True)
+@click.option('--lower', 'transformation', flag_value='lower')
+def feature_switches(transformation):
+    click.echo(getattr(sys.platform, transformation)())
+
+@cli.command()
+# @click.option('--password', prompt=True, hide_input=True,
+#               confirmation_prompt=True)
+@click.password_option()
+def encrypt(password):
+    # click.echo('Encrypting password to %s' % password.encode('rot13'))
+    click.echo('Encrypting password to %s' % codecs.encode(password, 'rot-13'))
+
+@cli.command()
+# @click.option('--username', prompt=True,
+@click.option('--username', prompt=False if os.environ.get('USER', '') else True,
+              default=lambda: os.environ.get('USER', ''),
+              show_default='current user')
+def read_user(username):
+    print("Hello,", username)
+
+def print_version(ctx, param, value):
+    if not value or ctx.resilient_parsing:
+        return
+    # click.echo('Version 1.0')
+    click.echo(version)
+    ctx.exit()
+
+@cli.command()
+@click.option('--version', is_flag=True, callback=print_version,
+              expose_value=False, is_eager=True)
+def callbacks_eager():
+    click.echo('Hello World!')
+
+# @click.group()
+# @click.option('--debug/--no-debug')
+# def cli(debug):
+#     click.echo('Debug mode is %s' % ('on' if debug else 'off'))
+
+@cli.command()
+@click.option('--username', envvar=f'{APP.upper()}_USERNAME')
+def greet(username):
+    click.echo('Hello %s!' % username)
+
+@cli.command()
+# @click.option('paths', '--path', envvar='PATHS', multiple=True,
+@click.option('paths', '--path', envvar='PATH', multiple=True,
+              type=click.Path())
+def perform(paths):
+    for path in paths:
+        click.echo(path)
+
+@cli.command()
+@click.option('+w/-w')
+def chmod(w):
+    click.echo('writable=%s' % w)
+
+def validate_rolls(ctx, param, value):
+    try:
+        rolls, dice = map(int, value.split('d', 2))
+        return (dice, rolls)
+    except ValueError:
+        raise click.BadParameter('rolls need to be in format NdM')
+
+@cli.command()
+@click.option('--rolls', callback=validate_rolls, default='1d6', show_default=True)
+def roll(rolls):
+    click.echo('Rolling a %d-sided dice %d time(s)' % rolls)
+
 def main():
     cli(prog_name=APP)
     cli.add_command(initdb)
@@ -160,6 +271,18 @@ def main():
     cli.add_command(repeat)
     cli.add_command(parse_datetime)
     cli.add_command(convert)
+    cli.add_command(putitem)
+    cli.add_command(commit)
+    cli.add_command(log)
+    cli.add_command(info)
+    cli.add_command(feature_switches)
+    cli.add_command(encrypt)
+    cli.add_command(read_user)
+    cli.add_command(callbacks_eager)
+    cli.add_command(greet)
+    cli.add_command(perform)
+    cli.add_command(chmod)
+    add_command(roll)
 
 
 if __name__ == '__main__':
