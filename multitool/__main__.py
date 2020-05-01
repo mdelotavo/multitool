@@ -271,6 +271,26 @@ def echo(src):#try export SRC=hello.txt
     """Print value of SRC environment variable."""
     click.echo(src.read())
 
+def common_auth_options(func):
+    username_envvar = os.environ.get(f'{APP.upper()}_USERNAME', '')
+    password_envvar = os.environ.get(f'{APP.upper()}_PASSWORD', '')
+    if username_envvar:
+        func = click.option('-u', '--username', default=username_envvar,
+                            show_default='current username')(func)
+    else:
+        func = click.option('-u', '--username', required=True)(func)
+    if password_envvar:
+        func = click.option('-p', '--password', default=password_envvar,
+                            show_default='current password')(func)
+    else:
+        func = click.option('-p', '--password', required=True)(func)
+    return func
+
+@cli.command()
+@common_auth_options
+def login(*args, **kwargs):
+    click.echo((args, kwargs))
+
 def main():
     cli(prog_name=APP)
     cli.add_command(initdb)
@@ -300,6 +320,7 @@ def main():
     cli.add_command(roll)
     cli.add_command(copy)
     cli.add_command(echo)
+    cli.add_command(login)
 
 
 if __name__ == '__main__':
