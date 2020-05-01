@@ -282,7 +282,7 @@ def main():
     cli.add_command(greet)
     cli.add_command(perform)
     cli.add_command(chmod)
-    add_command(roll)
+    cli.add_command(roll)
 
 
 if __name__ == '__main__':
