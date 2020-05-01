@@ -1,0 +1,39 @@
+import os, sys, re
+
+from multitool import APP
+from multitool import __version__ as version
+from multitool import description
+
+readme = os.path.join(os.path.dirname(__file__), 'README.md')
+long_description = open(readme).read()
+
+SETUP_ARGS = dict(
+    name=APP,
+    version=version,
+    description=(description),
+    long_description=long_description,
+    url='https://github.com/<your login>/multitool',
+    author='<AUTHOR>',
+    author_email='<EMAIL>',
+    license='MIT',
+    include_package_data=True,
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Environment :: Console',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python :: 3.7',
+    ],
+    py_modules = ['multitool',],
+    install_requires = [
+        'requests>=2.22',
+        'click'
+    ],
+)
+
+if __name__ == '__main__':
+    from setuptools import setup, find_packages
+
+    SETUP_ARGS['packages'] = find_packages()
+    setup(**SETUP_ARGS)
