@@ -265,6 +265,12 @@ def copy(src, dst):
     for fn in src:
         click.echo('move %s to folder %s' % (fn, dst))
 
+@cli.command()
+@click.argument('src', envvar='SRC', type=click.File('r'))
+def echo(src):#try export SRC=hello.txt
+    """Print value of SRC environment variable."""
+    click.echo(src.read())
+
 def main():
     cli(prog_name=APP)
     cli.add_command(initdb)
@@ -293,6 +299,7 @@ def main():
     cli.add_command(chmod)
     cli.add_command(roll)
     cli.add_command(copy)
+    cli.add_command(echo)
 
 
 if __name__ == '__main__':
