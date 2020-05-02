@@ -4,3 +4,4 @@ coverage==5.0.3
 pudb==2019.2
 requests==2.22.0
 click
+colorama

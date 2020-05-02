@@ -2,10 +2,12 @@
 # __main__.py
 
 import codecs
+import configparser
 import os
 import re
 import requests
 import sys
+import time
 from functools import update_wrapper
 
 import click
@@ -417,12 +419,109 @@ def delete():
 @cli.command()
 @click.argument('f', type=click.File())
 def cat(f):
-   click.echo(f.read())
+    click.echo(f.read())
 
 @cli.command()
 @click.option('--foo', prompt=True)
 def prompt2(foo):
-   click.echo('foo=%s' % foo)
+    click.echo('foo=%s' % foo)
+
+@cli.command()
+def print_stdout():
+    click.echo('Hello World!')
+    click.echo(b'\xe2\x98\x83', nl=False)
+    click.echo('Hello World!', err=True)
+
+@cli.command()
+def ansi_colors():
+    click.secho('Hello World!', fg='green')
+    click.secho('Some more text', bg='blue', fg='white')
+    click.secho('ATTENTION', blink=True, bold=True)
+
+def _generate_output(lines):
+    for idx in range(lines):
+        yield "Line %d\n" % idx
+
+@cli.command()
+@click.option("--lines", default=50000, help="Number of lines.", show_default=True)
+def less(lines):
+    click.echo_via_pager(_generate_output(lines))
+
+@cli.command()
+def clear():
+    click.clear()
+
+@cli.command()
+def getchar():
+    click.echo('Continue? [yn] ', nl=False)
+    c = click.getchar()
+    click.echo()
+    if c == 'y':
+        click.echo('We will go on')
+    elif c == 'n':
+        click.echo('Abort!')
+    else:
+        click.echo('Invalid input :(')
+
+@cli.command()
+def pause():
+    click.pause()
+
+@cli.command()
+def get_commit_message():
+    MARKER = '# Everything below is ignored\n'
+    message = click.edit('\n\n' + MARKER)
+    if message is not None:
+        return message.split(MARKER, 1)[0].rstrip('\n')
+
+@cli.command()
+@click.argument('filename', type=click.Path(exists=True, dir_okay=False, file_okay=True, resolve_path=False))
+def edit(filename):
+    """Edit FILENAME if the file exists."""
+    click.edit(filename=filename)
+
+@cli.command()
+@click.argument('resource')
+def launch(resource):
+    """This can be used to open the default application associated with a URL or filetype."""
+    click.launch(resource, locate=True)
+
+@cli.command()
+def get_streams():
+    stdin_text = click.get_text_stream('stdin')
+    stdout_binary = click.get_binary_stream('stdout')
+    click.echo((stdin_text, stdout_binary))
+
+@cli.command()
+@click.argument('filename', type=click.Path(exists=False, dir_okay=False, file_okay=True, resolve_path=False))
+def write_file(filename):
+    """Write 'Hello World!' to FILENAME."""
+    # stdout = click.open_file('-', 'w')
+    # test_file = click.open_file('test.txt', 'w')
+    with click.open_file(filename, 'w') as f:
+        f.write('Hello World!\n')
+
+@cli.command()
+@click.argument('app_name', type=click.Path(exists=False, dir_okay=False, file_okay=True, resolve_path=False))
+def read_config(app_name):
+    """Print APP_NAME config file."""
+    cfg = os.path.join(click.get_app_dir(app_name), 'config.ini')
+    click.echo(cfg)
+    parser = configparser.RawConfigParser()
+    parser.read([cfg])
+    rv = {}
+    for section in parser.sections():
+        for key, value in parser.items(section):
+            rv['%s.%s' % (section, key)] = value
+    click.echo(rv)
+    return rv
+
+@cli.command()
+def progress_bar():
+    with click.progressbar([1, 2, 3], label='Incremental sleep') as bar:
+        for x in bar:
+            click.echo(' sleep({})...'.format(x))
+            time.sleep(x)
 
 def main():
     cli(prog_name=APP, obj={})
@@ -471,6 +570,18 @@ def main():
     cli.add_command(cp)
     cli.add_command(cat)
     cli.add_command(prompt2)
+    cli.add_command(print_stdout)
+    cli.add_command(ansi_colors)
+    cli.add_command(less)
+    cli.add_command(clear)
+    cli.add_command(getchar)
+    cli.add_command(pause)
+    cli.add_command(get_commit_message)
+    cli.add_command(edit)
+    cli.add_command(launch)
+    cli.add_command(write_file)
+    cli.add_command(read_config)
+    cli.add_command(progress_bar)
 
 
 if __name__ == '__main__':

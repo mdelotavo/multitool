@@ -32,7 +32,8 @@ SETUP_ARGS = dict(
     ''',
     install_requires = [
         'requests>=2.22',
-        'click'
+        'click',
+        'colorama'
     ],
 )
 
