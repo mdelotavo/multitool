@@ -25,13 +25,13 @@ def do_hello():
     result = requests.get(URL)
     show_message(re.findall('<title>(.*?)</title>', result.text)[0])
 
-@click.command()
-@click.option("--count", default=1, help="Number of greetings.")
-@click.option("--name", prompt="Your name", help="The person to greet.")
-def hello(count, name):
-    """Simple program that greets NAME for a total of COUNT times."""
-    for _ in range(count):
-        click.echo(f"Hello, {name}!")
+# @click.command()
+# @click.option("--count", default=1, help="Number of greetings.")
+# @click.option("--name", prompt="Your name", help="The person to greet.")
+# def hello(count, name):
+#     """Simple program that greets NAME for a total of COUNT times."""
+#     for _ in range(count):
+#         click.echo(f"Hello, {name}!")
 
 class AliasedGroup(click.Group):
 
@@ -53,6 +53,24 @@ class AliasedGroup(click.Group):
 @click.option('--debug/--no-debug', default=False)
 @click.pass_context
 def cli(ctx, debug):
+    """First paragraph.
+
+    This is a very long second paragraph and as you
+    can see wrapped very early in the source text
+    but will be rewrapped to the terminal width in
+    the final output.
+
+    \b
+    This is
+    a paragraph
+    without rewrapping.
+
+    And this is a paragraph
+    that will be rewrapped again.
+    \f
+
+    :param click.core.Context ctx: Click context.
+    """
     # ensure that ctx.obj exists and is a dict (in case `cli()` is called
     # by means other than the `if` block below)
     # click.echo('Debug mode is %s' % ('on' if debug else 'off'))
@@ -350,6 +368,22 @@ def prompt():
     if click.confirm('Do you want to continue?', abort=True):
         click.echo('Well done!')
 
+@cli.command()
+@click.option("--count", default=1, help="Number of greetings.", metavar='<int>')
+@click.option("--name", prompt="Your name", help="The person to greet.", metavar='<name>')
+def hello(count, name):
+    """Simple program that greets NAME for a total of COUNT times."""
+    for _ in range(count):
+        click.echo(f"Hello, {name}!")
+
+@cli.command('init', short_help='init the repo')
+def init():
+    """Initializes the repository."""
+
+@cli.command('delete', short_help='delete the repo')
+def delete():
+    """Deletes the repository."""
+
 def main():
     cli(prog_name=APP, obj={})
     # cli(prog_name=APP, obj={}, default_map={
@@ -390,6 +424,9 @@ def main():
     # cli.add_command(bdist_wheel)
     cli.add_command(runserver)
     cli.add_command(prompt)
+    cli.add_command(hello)
+    cli.add_command(init)
+    cli.add_command(delete)
 
 
 if __name__ == '__main__':
