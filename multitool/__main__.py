@@ -414,6 +414,16 @@ def init():
 def delete():
     """Deletes the repository."""
 
+@cli.command()
+@click.argument('f', type=click.File())
+def cat(f):
+   click.echo(f.read())
+
+@cli.command()
+@click.option('--foo', prompt=True)
+def prompt2(foo):
+   click.echo('foo=%s' % foo)
+
 def main():
     cli(prog_name=APP, obj={})
     # cli(prog_name=APP, obj={}, default_map={
@@ -459,6 +469,8 @@ def main():
     cli.add_command(delete)
     cli.add_command(clone)
     cli.add_command(cp)
+    cli.add_command(cat)
+    cli.add_command(prompt2)
 
 
 if __name__ == '__main__':
