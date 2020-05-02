@@ -6,6 +6,7 @@ import os
 import re
 import requests
 import sys
+from functools import update_wrapper
 
 import click
 
@@ -14,6 +15,10 @@ from multitool import __version__ as version
 from multitool.utils import show_message
 
 URL = 'https://en.wikipedia.org/wiki/"Hello,_World!"_program'
+CONTEXT_SETTINGS = dict(
+    help_option_names=["-h", "--help"],
+    default_map={'runserver': {'port': 5000}}
+)
 
 
 def do_hello():
@@ -42,11 +47,23 @@ class AliasedGroup(click.Group):
             return click.Group.get_command(self, ctx, matches[0])
         ctx.fail('Too many matches: %s' % ', '.join(sorted(matches)))
 
-@click.group(context_settings=dict(help_option_names=["-h", "--help"]), cls=AliasedGroup)
+@click.group(context_settings=CONTEXT_SETTINGS, cls=AliasedGroup, invoke_without_command=False, chain=False)
 @click.version_option(version, '-V', '--version')
 # @click.command(cls=AliasedGroup)
-def cli():
-    pass
+@click.option('--debug/--no-debug', default=False)
+@click.pass_context
+def cli(ctx, debug):
+    # ensure that ctx.obj exists and is a dict (in case `cli()` is called
+    # by means other than the `if` block below)
+    # click.echo('Debug mode is %s' % ('on' if debug else 'off'))
+    ctx.ensure_object(dict)
+
+    ctx.obj['DEBUG'] = debug
+
+    # if ctx.invoked_subcommand is None:
+    #     click.echo('I was invoked without subcommand')
+    # else:
+    #     click.echo('I am about to invoke %s' % ctx.invoked_subcommand)
 
 @cli.command()
 def initdb():
@@ -291,8 +308,47 @@ def common_auth_options(func):
 def login(*args, **kwargs):
     click.echo((args, kwargs))
 
+# @cli.command()  # @cli, not @click!
+# @click.pass_context
+# def sync(ctx):
+#     click.echo('Debug is %s' % (ctx.obj['DEBUG'] and 'on' or 'off'))
+#     click.echo('Syncing')
+
+def pass_obj(f):
+    @click.pass_context
+    def new_func(ctx, *args, **kwargs):
+        return ctx.invoke(f, ctx.obj, *args, **kwargs)
+    return update_wrapper(new_func, f)
+
+@cli.command()  # @cli, not @click!
+# @click.pass_obj
+@pass_obj
+def sync(ctx):
+    # click.echo('Debug is %s' % (ctx.obj['DEBUG'] and 'on' or 'off'))
+    click.echo('Debug is %s' % (ctx['DEBUG'] and 'on' or 'off'))
+    # click.echo(str(ctx))
+    click.echo('Syncing')
+
+# @cli.command('sdist')
+# def sdist():
+#     click.echo('sdist called')
+#
+# @cli.command('bdist_wheel')
+# def bdist_wheel():
+#     click.echo('bdist_wheel called')
+
+@cli.command()
+@click.option('--port', default=8000)
+def runserver(port):
+    click.echo('Serving on http://127.0.0.1:%d/' % port)
+
 def main():
-    cli(prog_name=APP)
+    cli(prog_name=APP, obj={})
+    # cli(prog_name=APP, obj={}, default_map={
+    #     'runserver': {
+    #         'port': 5000
+    #     }
+    # })
     cli.add_command(initdb)
     cli.add_command(dropdb)
     cli.add_command(parse_str)
@@ -321,6 +377,10 @@ def main():
     cli.add_command(copy)
     cli.add_command(echo)
     cli.add_command(login)
+    cli.add_command(sync)
+    # cli.add_command(sdist)
+    # cli.add_command(bdist_wheel)
+    cli.add_command(runserver)
 
 
 if __name__ == '__main__':
