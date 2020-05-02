@@ -47,12 +47,18 @@ class AliasedGroup(click.Group):
             return click.Group.get_command(self, ctx, matches[0])
         ctx.fail('Too many matches: %s' % ', '.join(sorted(matches)))
 
+class Repo(object):
+    def __init__(self, home=None, debug=False):
+        self.home = os.path.abspath(home or '.')
+        self.debug = debug
+
 @click.group(context_settings=CONTEXT_SETTINGS, cls=AliasedGroup, invoke_without_command=False, chain=False)
 @click.version_option(version, '-V', '--version')
 # @click.command(cls=AliasedGroup)
+@click.option('--repo-home', envvar='REPO_HOME', default='.repo')
 @click.option('--debug/--no-debug', default=False)
 @click.pass_context
-def cli(ctx, debug):
+def cli(ctx, repo_home, debug):
     """First paragraph.
 
     This is a very long second paragraph and as you
@@ -82,6 +88,30 @@ def cli(ctx, debug):
     #     click.echo('I was invoked without subcommand')
     # else:
     #     click.echo('I am about to invoke %s' % ctx.invoked_subcommand)
+
+    ctx.obj['REPO'] = Repo(repo_home, debug)
+
+# @cli.command()
+# @click.argument('src')
+# @click.argument('dest', required=False)
+# @click.pass_obj
+# def clone(repo, src, dest):
+#     click.echo((repo, src, dest))
+
+# pass_repo = click.make_pass_decorator(Repo)
+pass_repo = click.make_pass_decorator(Repo, ensure=True)
+
+@cli.command()
+@click.argument('src')
+@click.argument('dest', required=False)
+@pass_repo
+def clone(repo, src, dest):
+    click.echo((repo, src, dest))
+
+@cli.command()
+@pass_repo
+def cp(repo):
+    click.echo(isinstance(repo, Repo))
 
 @cli.command()
 def initdb():
@@ -427,6 +457,8 @@ def main():
     cli.add_command(hello)
     cli.add_command(init)
     cli.add_command(delete)
+    cli.add_command(clone)
+    cli.add_command(cp)
 
 
 if __name__ == '__main__':
