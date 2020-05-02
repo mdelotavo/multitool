@@ -342,6 +342,14 @@ def sync(ctx):
 def runserver(port):
     click.echo('Serving on http://127.0.0.1:%d/' % port)
 
+@cli.command()
+def prompt():
+    # value = click.prompt('Please enter a valid integer', type=int)
+    value = click.prompt('Please enter a number', default=42.0)
+    click.echo(value)
+    if click.confirm('Do you want to continue?', abort=True):
+        click.echo('Well done!')
+
 def main():
     cli(prog_name=APP, obj={})
     # cli(prog_name=APP, obj={}, default_map={
@@ -381,6 +389,7 @@ def main():
     # cli.add_command(sdist)
     # cli.add_command(bdist_wheel)
     cli.add_command(runserver)
+    cli.add_command(prompt)
 
 
 if __name__ == '__main__':
