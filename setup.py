@@ -4,7 +4,7 @@ from multitool import APP
 from multitool import __version__ as version
 from multitool import description
 
-readme = os.path.join(os.path.dirname(__file__), 'README.md')
+readme = os.path.join(os.path.dirname(__file__), 'README.rst')
 long_description = open(readme).read()
 
 SETUP_ARGS = dict(
