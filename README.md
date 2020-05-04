@@ -1,4 +1,8 @@
 # multitool
+Multitool is a command-line interface template for learning how to package command-line tools using the Click package.
+
+To learn more about Click, see the docs: https://click.palletsprojects.com/
+
 To create a virtual environment:
 ```
 pip3 install virtualenv
