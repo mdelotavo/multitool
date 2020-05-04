@@ -1,12 +1,18 @@
 # multitool
+To create a virtual environment:
 ```
+pip3 install virtualenv
+virtualenv venv
+source venv/bin/activate
+
 pip3 install -e .
-python3 -m multitool --count 3
+python3 -m multitool -V
+python3 -m multitool -h   # or just `multitool -h`
 
 pip3 install -r requirements.txt
 ./runtests.sh
 
-python3 -m multitool -h   # or just `multitool -h`
+deactivate
 
 ```
 
