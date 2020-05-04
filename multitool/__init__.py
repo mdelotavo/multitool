@@ -1,3 +1,3 @@
 APP = 'multitool'
 __version__ = '0.1.0'
-description = 'Multitool command-line interface'
+description = 'Command-line interface for learning the Click package'
