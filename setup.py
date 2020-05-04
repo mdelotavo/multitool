@@ -15,7 +15,7 @@ SETUP_ARGS = dict(
     url='https://github.com/mdelotavo/multitool',
     author='Matthew Delotavo',
     author_email='matthew.t.delotavo@gmail.com',
-    license='MIT',
+    license='BSD License (BSD-3-Clause)',
     include_package_data=True,
     classifiers=[
         'Development Status :: 4 - Beta',
