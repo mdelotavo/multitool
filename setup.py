@@ -35,6 +35,7 @@ SETUP_ARGS = dict(
         'click',
         'colorama'
     ],
+    python_requires=">=3.6",
 )
 
 if __name__ == '__main__':
