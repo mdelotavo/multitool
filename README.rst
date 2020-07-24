@@ -65,14 +65,14 @@ Non-interactive:
 
 .. code-block:: text
 
-    $ pym multitool encrypt --password asdf
+    $ multitool encrypt --password asdf
     Encrypting password to nfqs
 
 Interactive:
 
 .. code-block:: text
 
-    $ pym multitool encrypt
+    $ multitool encrypt
     Password:
     Repeat for confirmation:
     Encrypting password to nfqs
