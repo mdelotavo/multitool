@@ -21,7 +21,9 @@ To create a virtual environment:
 
     deactivate
 
-Usage:
+-----
+Usage
+-----
 
 .. code-block:: text
 
@@ -49,52 +51,28 @@ Usage:
       ansi-colors
       callbacks-eager
       cat
-      chmod
-      clear
-      clone
-      commit
-      convert
-      copy                Move file SRC to DST.
-      cp
-      delete              delete the repo
-      digest
-      dropdb
-      echo                Print value of SRC environment variable.
-      edit                Edit FILENAME if the file exists.
-      encrypt
-      feature-switches
-      get-commit-message
-      get-streams
-      getchar
-      greet
-      hello               Simple program that greets NAME for a total of COUNT...
-      info
-      init                init the repo
-      initdb
-      inout               Copy contents of INPUT to OUTPUT.
-      launch              This can be used to open the default application...
-      less
-      log
-      login
-      parse-bool
-      parse-datetime
-      parse-float
-      parse-int
-      parse-str
-      parse-uuid
-      pause
-      perform
-      print-stdout
-      progress-bar
-      prompt
-      prompt2
-      putitem
-      read-config         Print APP_NAME config file.
-      read-user
-      repeat
-      repeat-float
-      roll
-      runserver
+
+    ...snip...
+
       sync
       touch               Print FILENAME if the file exists.
       write-file          Write 'Hello World!' to FILENAME.
+
+-----------
+``encrypt``
+-----------
+Non-interactive:
+
+.. code-block:: text
+
+    $ pym multitool encrypt --password asdf
+    Encrypting password to nfqs
+
+Interactive:
+
+.. code-block:: text
+
+    $ pym multitool encrypt
+    Password:
+    Repeat for confirmation:
+    Encrypting password to nfqs
