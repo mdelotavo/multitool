@@ -1,5 +1,5 @@
 APP = 'multitool'
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 description = 'General-purpose command-line interface with plugins support'
 # long_description = 'Multitool is general-purpose command-line interface with plugins support'
 
