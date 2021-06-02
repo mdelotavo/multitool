@@ -26,10 +26,11 @@ SETUP_ARGS = dict(
         'Programming Language :: Python :: 3.7',
     ],
     # py_modules = ['multitool',],
-    entry_points='''
-        [console_scripts]
-        multitool=multitool.__main__:cli
-    ''',
+    # entry_points='''
+    #     [console_scripts]
+    #     multitool=multitool.__main__:cli
+    # ''',
+    entry_points={'console_scripts': ['multitool=multitool.__main__:main']},
     install_requires = [
         'requests>=2.22',
         'click',
