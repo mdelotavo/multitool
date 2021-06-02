@@ -33,7 +33,16 @@ SETUP_ARGS = dict(
     install_requires = [
         'requests>=2.22',
         'click',
-        'colorama'
+        'click-aliases',
+        'click-option-group',
+        'colorama',
+        'pyotp',
+        'requests',
+        'tqdm',
+        'tabulate',
+        'pyjwt',
+        'python-gnupg>=0.3.5',
+        'gitpython'
     ],
     python_requires=">=3.6",
 )
