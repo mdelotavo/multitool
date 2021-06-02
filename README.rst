@@ -3,13 +3,19 @@ multitool
 
 Multitool is general-purpose command-line interface with plugins support.
 
-Multitool revolves around the use of the `click.palletsprojects`_ package for creating command plugins which are dynamically loadable into the command-line at runtime.
+Multitool revolves around using the `click.palletsprojects`_ package to create command plugins which are dynamically loadable into the ``multitool`` command-line at runtime.
 
 The plugins features are based off those found in the `apigeecli`_.
 
 The plugins manager uses Git to manage plugins that can be installed from remote Git repositories. If Git is unavailable, then the plugins commands will not be available. However, it is possible to manually install plugins by dragging them into the correct locations.
 
 Example plugins are available for installation here: `multitool-plugins`_.
+
+--------------------
+Why does this exist?
+--------------------
+
+TBD
 
 ------------
 How it works
