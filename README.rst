@@ -1,7 +1,7 @@
 multitool
 =========
 
-Multitool is general-purpose command-line interface with plugins support.
+Multitool is a general-purpose command-line interface with plugins support.
 
 Multitool revolves around using the `click.palletsprojects`_ package to create command plugins which are dynamically loadable into the ``multitool`` command-line at runtime.
 
