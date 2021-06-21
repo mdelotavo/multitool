@@ -1,7 +1,7 @@
 APP = 'multitool'
-__version__ = '0.2.2'
+__version__ = '0.2.3'
 description = 'General-purpose command-line interface with plugins support'
-# long_description = 'Multitool is general-purpose command-line interface with plugins support'
+# long_description = 'General-purpose command-line interface with plugins support'
 
 from os import getenv
 from pathlib import Path
