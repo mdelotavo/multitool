@@ -3,34 +3,6 @@ multitool
 
 Multitool is a general-purpose command-line interface with plugins support.
 
-Multitool revolves around using the `click.palletsprojects`_ package to create command plugins which are dynamically loadable into the ``multitool`` command-line at runtime.
-
-The plugins features are based off those found in the `apigeecli`_.
-
-The plugins manager uses Git to manage plugins that can be installed from remote Git repositories. If Git is unavailable, then the plugins commands will not be available. However, it is possible to manually install plugins by dragging them into the correct locations.
-
-Example plugins are available for installation here: `multitool-plugins`_.
-
---------------------
-Why does this exist?
---------------------
-
-TBD
-
-------------
-How it works
-------------
-
-1. The plugins manager ``multitool/plugins/commands.py`` will clone or pull remote repositories into ``~/.multitool/plugins/``.
-2. The ``_load_all_modules_in_directory()`` function in ``multitool/__main__.py`` will attempt to import the functions as specified in the ``__init__.py`` file for each plugin repository found in ``~/.multitool/plugins/``.
-3. If the functions found are of instance type ``(click.core.Command, click.core.Group)`` then the CLI will add it to the list of available commands.
-
-Further details are to be documented, including how to write plugins and leverage some useful CLI libraries.
-
------
-Usage
------
-
 .. code-block:: text
 
     Usage: multitool [OPTIONS] COMMAND [ARGS]...
@@ -47,6 +19,18 @@ Usage
     Commands:
       plugins  Simple plugins manager for distributing commands.
 
+.. ..
+    It revolves around using the `click`_ package to create command plugins which are dynamically loadable into the ``multitool`` command-line at runtime.
+
+.. ..
+    The plugins features are based off those found in the `apigeecli`_.
+
+--------------------
+Why does this exist?
+--------------------
+
+I use it to quickly create and distribute command-line tools for consulting work and personal use. The plugins manager uses Git to promote GitOps practices. Git is used to manage plugins installed from remote Git repositories. If Git is unavailable, then the plugins commands will not be available. However, it is possible to manually install plugins by dragging them into the correct locations.
+
 ----------------
 Managing plugins
 ----------------
@@ -56,9 +40,7 @@ However, it is possible to install plugins manually by storing plugins in the co
 
 Currently, only the commands shown below are supported. More commands will be added to improve automation and user experience.
 
-The steps below show how to install commands from a public plugins repository located here:
-
-* https://github.com/mdelotavo/multitool-plugins
+The steps below show how to install commands from a `public plugins repository`_.
 
 ^^^^^^^^^^^
 Configuring
@@ -124,25 +106,27 @@ More details coming soon.::
 
     pip3 install $(multitool plugins show -n PLUGIN_NAME --show-dependencies-only)
 
-----------------------------
-Create a virtual environment
-----------------------------
+.. ..
+    ----------------------------
+    Create a virtual environment
+    ----------------------------
 
-.. code-block:: text
+    .. code-block:: text
 
-    pip3 install virtualenv
-    virtualenv venv
-    source venv/bin/activate
+        pip3 install virtualenv
+        virtualenv venv
+        source venv/bin/activate
 
-    pip3 install -e .
-    python3 -m multitool -V
-    python3 -m multitool -h   # or just `multitool -h`
+        pip3 install -e .
+        python3 -m multitool -V
+        python3 -m multitool -h   # or just `multitool -h`
 
-    pip3 install -r requirements.txt
-    ./runtests.sh
+        pip3 install -r requirements.txt
+        ./runtests.sh
 
-    deactivate
+        deactivate
 
-.. _`click.palletsprojects`: https://click.palletsprojects.com/
+.. _`click`: https://click.palletsprojects.com/
 .. _`apigeecli`: https://pypi.org/project/apigeecli/
 .. _`multitool-plugins`: https://github.com/mdelotavo/multitool-plugins
+.. _`public plugins repository`: https://github.com/mdelotavo/multitool-plugins
