@@ -6,20 +6,22 @@ import configparser
 import importlib
 import os
 import re
-import requests
 import sys
 import time
 from functools import update_wrapper
 
 import click
+import requests
 
-from multitool import APP
-from multitool import MULTITOOL_PLUGINS_DIRECTORY, MULTITOOL_PLUGINS_PATH, APP
+from multitool import (APP, MULTITOOL_LOG_FILE, MULTITOOL_PLUGINS_DIRECTORY,
+                       MULTITOOL_PLUGINS_PATH)
 from multitool import __version__ as version
 from multitool.cls import AliasedGroup
 from multitool.exceptions import exception_handler
 from multitool.plugins.commands import plugins
-from multitool.utils import is_dir, run_func_on_dir_files, show_message
+from multitool.utils import (import_all_modules_in_directory,
+                             run_func_on_dir_files, setup_global_logger,
+                             show_message)
 
 # URL = 'https://en.wikipedia.org/wiki/"Hello,_World!"_program'
 # CONTEXT_SETTINGS = dict(
@@ -27,7 +29,6 @@ from multitool.utils import is_dir, run_func_on_dir_files, show_message
 #     default_map={'runserver': {'port': 5000}}
 # )
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-
 
 # # def do_hello():
 # #     result = requests.get(URL)
@@ -544,6 +545,7 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 #     # cli() # pragma: no cover
 #     main() # pragma: no cover
 
+
 @click.group(
     context_settings=CONTEXT_SETTINGS, cls=AliasedGroup, invoke_without_command=False, chain=False
 )
@@ -567,28 +569,15 @@ def cli(ctx):
 
 @exception_handler
 def main():
-    cli_commands = {
-        plugins,
-    }
+    setup_global_logger(MULTITOOL_LOG_FILE)
 
-    def _load_all_modules_in_directory(plugins_init_file):
-        try:
-            spec = importlib.util.spec_from_file_location('plugins_modules', plugins_init_file)
-            module = importlib.util.module_from_spec(spec)
-            sys.modules[spec.name] = module
-            spec.loader.exec_module(module)
-            import plugins_modules
-            from plugins_modules import __all__ as all_plugins_modules
-
-            for module in all_plugins_modules:
-                _module = getattr(plugins_modules, module)
-                if isinstance(_module, (click.core.Command, click.core.Group)):
-                    cli_commands.add(_module)
-        except ImportError:
-            pass
+    cli_commands = {plugins}
 
     run_func_on_dir_files(
-        MULTITOOL_PLUGINS_DIRECTORY, _load_all_modules_in_directory, glob='[!.][!__]*/__init__.py'
+        MULTITOOL_PLUGINS_DIRECTORY,
+        import_all_modules_in_directory,
+        args=(cli_commands,),
+        glob='[!.][!__]*/__init__.py',
     )
 
     for command in cli_commands:

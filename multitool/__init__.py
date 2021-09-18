@@ -1,21 +1,19 @@
 APP = 'multitool'
-__version__ = '0.2.4'
+__version__ = '0.3.0'
 description = 'General-purpose command-line interface with plugins support'
 # long_description = 'General-purpose command-line interface with plugins support'
 
-from os import getenv
 from pathlib import Path
 
-from multitool.utils import concat_str_path, is_true
-
+from multitool.utils import generate_path_str
 
 MULTITOOL_TOGGLE_SILENT = False
 MULTITOOL_TOGGLE_VERBOSE = 0
 
-MULTITOOL_DIRECTORY = concat_str_path(Path.home(), '.multitool')
+MULTITOOL_DIRECTORY = generate_path_str(Path.home(), '.multitool')
 
-MULTITOOL_EXCEPTION_LOG_FILE = concat_str_path(MULTITOOL_DIRECTORY, 'exception.log')
+MULTITOOL_LOG_FILE = generate_path_str(MULTITOOL_DIRECTORY, f'{APP}.log')
 
-MULTITOOL_PLUGINS_DIRECTORY = concat_str_path(MULTITOOL_DIRECTORY, 'plugins')
-MULTITOOL_PLUGINS_CONFIG_FILE = concat_str_path(MULTITOOL_PLUGINS_DIRECTORY, 'config')
-MULTITOOL_PLUGINS_PATH = concat_str_path(MULTITOOL_PLUGINS_DIRECTORY, '__init__.py')
+MULTITOOL_PLUGINS_DIRECTORY = generate_path_str(MULTITOOL_DIRECTORY, 'plugins')
+MULTITOOL_PLUGINS_CONFIG_FILE = generate_path_str(MULTITOOL_PLUGINS_DIRECTORY, 'config')
+MULTITOOL_PLUGINS_PATH = generate_path_str(MULTITOOL_PLUGINS_DIRECTORY, '__init__.py')

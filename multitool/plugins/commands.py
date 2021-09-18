@@ -11,11 +11,11 @@ import click
 from click_option_group import MutuallyExclusiveOptionGroup, optgroup
 
 from multitool import (MULTITOOL_PLUGINS_CONFIG_FILE,
-                    MULTITOOL_PLUGINS_DIRECTORY, MULTITOOL_PLUGINS_PATH,
-                    console)
+                       MULTITOOL_PLUGINS_DIRECTORY, MULTITOOL_PLUGINS_PATH,
+                       console)
 from multitool.silent import common_silent_options
 from multitool.utils import (is_dir, is_file, make_dirs, read_file,
-                          run_func_on_dir_files, touch)
+                             run_func_on_dir_files, touch)
 from multitool.verbose import common_verbose_options
 
 is_git_installed = False
@@ -27,9 +27,7 @@ try:
 
     is_git_installed = True
 except ImportError:
-    plugins_command_help = (
-        '[Git not found! Please install Git first.] Simple plugins manager for distributing commands. This command requires Git to be installed.'
-    )
+    plugins_command_help = '[Git not found! Please install Git first.] Simple plugins manager for distributing commands. This command requires Git to be installed.'
 
 
 def exit_if_git_not_installed():

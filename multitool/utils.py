@@ -1,19 +1,16 @@
+import importlib
+import inspect
 import json
+import logging
 import os
 import re
 import sys
-import zipfile
 from pathlib import Path
 
-
-def add_to_dict_if_exists(options_dict, initial_dict={}):
-    for k, v in options_dict.items():
-        if v:
-            initial_dict[k] = v
-    return initial_dict
+import click
 
 
-def concat_str_path(*args):
+def generate_path_str(*args):
     if not args:
         return
     path = None
@@ -25,27 +22,35 @@ def concat_str_path(*args):
     return str(path)
 
 
-def convert_to_set(iterable):
-    if not isinstance(iterable, set):
-        return set(iterable)
-    return iterable
-
-
-def extract_zip(source, dest):
-    with zipfile.ZipFile(source, 'r') as zip_ref:
-        zip_ref.extractall(dest)
-
-
 def is_dir(d):
     return os.path.isdir(d)
+
+
+def is_envvar_true(value):
+    return value in (True, 'True', 'true', '1')
 
 
 def is_file(f):
     return os.path.isfile(f)
 
 
-def is_true(value):
-    return value in (True, 'True', 'true', '1')
+def import_all_modules_in_directory(plugins_init_file, existing_commands):
+    try:
+        spec = importlib.util.spec_from_file_location('plugins_modules', plugins_init_file)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module
+        spec.loader.exec_module(module)
+        import plugins_modules
+        from plugins_modules import __all__ as all_plugins_modules
+
+        for module in all_plugins_modules:
+            _module = getattr(plugins_modules, module)
+            if isinstance(_module, (click.core.Command, click.core.Group)):
+                existing_commands.add(_module)
+    except ImportError:
+        logging.warning(
+            f'{inspect.stack()[0][3]}; will skip loading plugin: {module}', exc_info=True
+        )
 
 
 def make_dirs(path):
@@ -53,7 +58,7 @@ def make_dirs(path):
         try:
             os.makedirs(path)
         except FileExistsError:
-            pass
+            logging.warning(f'{inspect.stack()[0][3]}; will ignore FileExistsError')
 
 
 def path_exists(file):
@@ -73,10 +78,9 @@ def read_file(file, type='text'):
         return f.read()
 
 
-def remove_last_items_from_list(init_list, integer=0):
-    if integer <= 0:
-        return init_list
-    return init_list[:-integer]
+def remove_file_above_size(file, size_kb=100):
+    if os.path.getsize(file) > size_kb * 1024:
+        os.remove(file)
 
 
 def resolve_target_directory(target_directory=None):
@@ -107,6 +111,15 @@ def run_func_on_iterable(iterable, func, state_op='append', args=(), kwargs={}):
     return state
 
 
+def setup_global_logger(log_file):
+    logging.basicConfig(
+        filename=log_file,
+        level=logging.DEBUG,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    )
+    remove_file_above_size(log_file, size_kb=1000)
+
+
 def show_message(msg):
     print(msg)
 
@@ -122,7 +135,7 @@ def touch(path):
     except FileNotFoundError:
         os.makedirs(os.path.split(path)[0])
     except FileExistsError:
-        pass
+        logging.warning(f'{inspect.stack()[0][3]}; will ignore FileExistsError')
 
 
 def write_file(content, path, fs_write=True, indent=None, eof=True):
@@ -143,13 +156,3 @@ def write_file(content, path, fs_write=True, indent=None, eof=True):
                 f.write(f'{content}\n')
             else:
                 f.write(content)
-
-
-def write_zip(file, content):
-    touch(file)
-    with open(file, 'wb') as f:
-        f.write(content)
-
-
-def show_message(msg):
-    print(msg)

@@ -4,12 +4,7 @@ import json
 import logging
 import sys
 
-from multitool import MULTITOOL_EXCEPTION_LOG_FILE, console
-from multitool.utils import touch
-
-
-class InvalidApisError(Exception):
-    pass
+from multitool import console
 
 
 class NotYetImplementedError(Exception):
@@ -23,12 +18,6 @@ def exception_handler(func):
             result = func(*args, **kwargs)
             return result
         except Exception as e:
-            touch(MULTITOOL_EXCEPTION_LOG_FILE)
-            f_handler = logging.FileHandler(MULTITOOL_EXCEPTION_LOG_FILE, 'w+')
-            f_handler.setLevel(logging.INFO)
-            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-            f_handler.setFormatter(formatter)
-            logging.getLogger("").addHandler(f_handler)
             logging.error('Exception occurred', exc_info=True)
             frm = inspect.trace()[-1]
             mod = inspect.getmodule(frm[0])
