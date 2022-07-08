@@ -61,16 +61,6 @@ def make_dirs(path):
             logging.warning(f'{inspect.stack()[0][3]}; will ignore FileExistsError')
 
 
-def path_exists(file):
-    if os.path.exists(file):
-        sys.exit(f'error: {file} already exists')
-
-
-def paths_exist(files):
-    for file in files:
-        path_exists(file)
-
-
 def read_file(file, type='text'):
     with open(file, 'r') as f:
         if type == 'json':
@@ -125,10 +115,6 @@ def show_message(msg):
     print(msg)
 
 
-def split_path(path, delimiter='[/\\\\]'):
-    return re.split(delimiter, path)
-
-
 def touch(path):
     try:
         make_dirs(os.path.split(path)[0])
@@ -137,23 +123,3 @@ def touch(path):
                 os.utime(path, None)
     except FileExistsError:
         logging.warning(f'{inspect.stack()[0][3]}; will ignore FileExistsError')
-
-
-def write_file(content, path, fs_write=True, indent=None, eof=True):
-    if not fs_write:
-        return
-    touch(path)
-    with open(path, 'w') as f:
-        if isinstance(content, str):
-            if eof:
-                content = f'{content}\n'
-            f.write(content)
-        elif isinstance(content, dict) or isinstance(content, list):
-            if isinstance(indent, int):
-                content = f'{json.dumps(content, indent=indent)}'
-            else:
-                content = f'{json.dumps(content)}'
-            if eof:
-                f.write(f'{content}\n')
-            else:
-                f.write(content)

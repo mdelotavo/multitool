@@ -7,10 +7,6 @@ import sys
 from multitool import console
 
 
-class NotYetImplementedError(Exception):
-    pass
-
-
 def exception_handler(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
