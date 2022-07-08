@@ -10,7 +10,7 @@ from pathlib import Path
 import click
 
 
-def generate_path_str(*args):
+def gen_path_str(*args):
     if not args:
         return
     path = None
