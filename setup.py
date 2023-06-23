@@ -1,4 +1,4 @@
-import os, sys, re
+import os
 
 from multitool import APP
 from multitool import __version__ as version
@@ -25,27 +25,25 @@ SETUP_ARGS = dict(
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3.7',
     ],
-    # py_modules = ['multitool',],
-    # entry_points='''
-    #     [console_scripts]
-    #     multitool=multitool.__main__:cli
-    # ''',
-    entry_points={'console_scripts': ['multitool=multitool.__main__:main']},
+    entry_points = {
+        'console_scripts': [
+            'multitool=multitool.__main__:main'
+        ]
+    },
     install_requires = [
-        'requests>=2.22',
-        'click',
-        'click-aliases',
-        'click-option-group',
-        'colorama',
-        'pyotp',
-        'requests',
-        'tqdm',
-        'tabulate',
-        'pyjwt',
-        'python-gnupg>=0.3.5',
-        'gitpython'
+        'requests>=2.28.1',
+        'click>=8.1.3',
+        'click-aliases>=1.0.1',
+        'click-option-group>=0.5.5',
+        'colorama>=0.4.6',
+        'pyotp>=2.8.0',
+        'tqdm>=4.64.1',
+        'tabulate>=0.9.0',
+        'pyjwt>=2.6.0',
+        'python-gnupg>=0.4.9',
+        'gitpython>=3.1.30'
     ],
-    python_requires=">=3.6",
+    python_requires=">=3.7",
 )
 
 if __name__ == '__main__':
