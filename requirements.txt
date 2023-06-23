@@ -2,6 +2,6 @@
 # subset, see setup.py for that list
 coverage==5.0.3
 pudb==2019.2
-requests==2.22.0
+requests==2.31.0
 click
 colorama
