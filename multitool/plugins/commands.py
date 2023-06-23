@@ -15,7 +15,7 @@ from multitool import (MULTITOOL_PLUGINS_CONFIG_FILE,
                        console)
 from multitool.silent import common_silent_options
 from multitool.utils import (is_directory, is_regular_file, create_directory, read_file_content,
-                             execute_function_on_directory_files, touch)
+                             execute_function_on_directory_files, create_empty_file)
 from multitool.verbose import common_verbose_options
 
 is_git_installed = False
@@ -42,8 +42,8 @@ def plugins():
 
 def init():
     create_directory(MULTITOOL_PLUGINS_DIRECTORY)
-    touch(MULTITOOL_PLUGINS_PATH)
-    touch(MULTITOOL_PLUGINS_CONFIG_FILE)
+    create_empty_file(MULTITOOL_PLUGINS_PATH)
+    create_empty_file(MULTITOOL_PLUGINS_CONFIG_FILE)
 
 
 def load_config(config_file=MULTITOOL_PLUGINS_CONFIG_FILE):
