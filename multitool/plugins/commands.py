@@ -14,8 +14,8 @@ from multitool import (MULTITOOL_PLUGINS_CONFIG_FILE,
                        MULTITOOL_PLUGINS_DIRECTORY, MULTITOOL_PLUGINS_PATH,
                        console)
 from multitool.silent import common_silent_options
-from multitool.utils import (is_dir, is_file, make_dirs, read_file,
-                             run_func_on_dir_files, touch)
+from multitool.utils import (is_directory, is_regular_file, create_directory, read_file_content,
+                             execute_function_on_directory_files, touch)
 from multitool.verbose import common_verbose_options
 
 is_git_installed = False
@@ -41,7 +41,7 @@ def plugins():
 
 
 def init():
-    make_dirs(MULTITOOL_PLUGINS_DIRECTORY)
+    create_directory(MULTITOOL_PLUGINS_DIRECTORY)
     touch(MULTITOOL_PLUGINS_PATH)
     touch(MULTITOOL_PLUGINS_CONFIG_FILE)
 
@@ -67,7 +67,7 @@ def clone_all(section='sources'):
     sources = dict(config._sections[section])
     for name, uri in sources.items():
         dest = Path(MULTITOOL_PLUGINS_DIRECTORY) / name
-        if is_dir(dest):
+        if is_directory(dest):
             continue
         try:
             console.echo(f'Installing {name}... ', end='', flush=True)
@@ -79,7 +79,7 @@ def clone_all(section='sources'):
 
 def pull_all():
     def _func(path):
-        if not is_dir(path):
+        if not is_directory(path):
             return
         console.echo(f'Updating {Path(path).stem}... ', end='', flush=True)
         repo = Repo(path)
@@ -91,7 +91,7 @@ def pull_all():
         except Exception as e:
             console.echo(e)
 
-    return run_func_on_dir_files(MULTITOOL_PLUGINS_DIRECTORY, _func, glob='[!.][!__]*')
+    return execute_function_on_directory_files(MULTITOOL_PLUGINS_DIRECTORY, _func, glob='[!.][!__]*')
 
 
 @plugins.command(help='Edit config file manually.')
@@ -157,9 +157,9 @@ def show(
             console.echo(f'{name}: {uri}')
         return
     plugins_info_file = Path(MULTITOOL_PLUGINS_DIRECTORY) / name / 'multitool-info.json'
-    if not is_file(plugins_info_file):
+    if not is_regular_file(plugins_info_file):
         return
-    plugins_info = read_file(plugins_info_file, type='json')
+    plugins_info = read_file_content(plugins_info_file, type='json')
     if show_commit_only:
         exit_if_git_not_installed()
         console.echo(
@@ -198,7 +198,7 @@ def prune_all(section='sources'):
     sources = dict(config._sections[section])
 
     def _func(path):
-        if not is_dir(path):
+        if not is_directory(path):
             return
         name = Path(path).stem
         if name in sources.keys():
@@ -212,7 +212,7 @@ def prune_all(section='sources'):
         except Exception as e:
             console.echo(e)
 
-    return run_func_on_dir_files(MULTITOOL_PLUGINS_DIRECTORY, _func, glob='[!.][!__]*')
+    return execute_function_on_directory_files(MULTITOOL_PLUGINS_DIRECTORY, _func, glob='[!.][!__]*')
 
 
 @plugins.command(help='Prune plugins with removed sources.')

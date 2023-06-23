@@ -19,8 +19,8 @@ from multitool import __version__ as version
 from multitool.cls import AliasedGroup
 from multitool.exceptions import exception_handler
 from multitool.plugins.commands import plugins
-from multitool.utils import (import_all_modules_in_directory,
-                             run_func_on_dir_files, setup_global_logger,
+from multitool.utils import (import_plugins_from_directory,
+                             execute_function_on_directory_files, configure_global_logger,
                              show_message)
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -47,13 +47,13 @@ def cli(ctx):
 
 @exception_handler
 def main():
-    setup_global_logger(MULTITOOL_LOG_FILE)
+    configure_global_logger(MULTITOOL_LOG_FILE)
 
     cli_commands = {plugins}
 
-    run_func_on_dir_files(
+    execute_function_on_directory_files(
         MULTITOOL_PLUGINS_DIRECTORY,
-        import_all_modules_in_directory,
+        import_plugins_from_directory,
         args=(cli_commands,),
         glob='[!.][!__]*/__init__.py',
     )
