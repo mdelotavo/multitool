@@ -3,15 +3,21 @@ import sys
 
 
 def echo(
-    *message, status=None, silent=False, curr_verbosity=0, expc_verbosity=0, end='\n', flush=False
+    *message,
+    exit_status=None,
+    make_silent=False,
+    current_verbosity=0,
+    expected_verbosity=0,
+    line_ending="\n",
+    should_flush=False
 ):
     toggle_silent = builtins.MULTITOOL_TOGGLE_SILENT
     toggle_verbose = builtins.MULTITOOL_TOGGLE_VERBOSE
-    if silent or toggle_silent:
-        if status:
-            sys.exit(status)
+    if make_silent or toggle_silent:
+        if exit_status:
+            sys.exit(exit_status)
         return
-    if curr_verbosity or toggle_verbose >= expc_verbosity:
-        print(*message, end=end, flush=flush)
-    if status:
-        sys.exit(status)
+    if current_verbosity or toggle_verbose >= expected_verbosity:
+        print(*message, end=line_ending, flush=should_flush)
+    if exit_status:
+        sys.exit(exit_status)

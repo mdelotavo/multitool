@@ -1,13 +1,12 @@
 import functools
 import inspect
-import json
 import logging
 import sys
 
 from multitool import console
 
 
-def exception_handler(func):
+def wrap_with_exception_handling(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         try:

@@ -1,27 +1,15 @@
 #!/usr/bin/env python
 # __main__.py
 
-import codecs
-import configparser
-import importlib
-import os
-import re
-import sys
-import time
-from functools import update_wrapper
-
 import click
-import requests
 
-from multitool import (APP, MULTITOOL_LOG_FILE, MULTITOOL_PLUGINS_DIRECTORY,
-                       MULTITOOL_PLUGINS_PATH)
+from multitool import APP, MULTITOOL_LOG_FILE, MULTITOOL_PLUGINS_DIRECTORY
 from multitool import __version__ as version
 from multitool.cls import AliasedGroup
-from multitool.exceptions import exception_handler
+from multitool.exceptions import wrap_with_exception_handling
 from multitool.plugins.commands import plugins
 from multitool.utils import (import_plugins_from_directory,
-                             execute_function_on_directory_files, configure_global_logger,
-                             show_message)
+                             execute_function_on_directory_files, configure_global_logger)
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
@@ -45,7 +33,7 @@ def cli(ctx):
     ctx.ensure_object(dict)
 
 
-@exception_handler
+@wrap_with_exception_handling
 def main():
     configure_global_logger(MULTITOOL_LOG_FILE)
 
