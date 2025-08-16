@@ -124,9 +124,9 @@ In order for this to work, the plugin needs to have the ``Requires`` key in the 
 
     pip3 install $(multitool plugins show -n PLUGIN_NAME --show-dependencies-only)
 
-^^^^^^^^^^^^
+^^^^^^^^^^^^^^^
 Troubleshooting
-^^^^^^^^^^^^
+^^^^^^^^^^^^^^^
 
 If you encounter issues with plugins or commands, you can find more detailed debug information and error messages in the log file:
 ::
