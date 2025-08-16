@@ -9,7 +9,7 @@ from pathlib import Path
 import click
 from click_option_group import MutuallyExclusiveOptionGroup, optgroup
 
-from multitool import (MULTITOOL_PLUGINS_CONFIG_FILE,
+from multitool import (APP, MULTITOOL_PLUGINS_CONFIG_FILE,
                        MULTITOOL_PLUGINS_DIRECTORY, MULTITOOL_PLUGINS_PATH,
                        console)
 from multitool.silent import common_silent_options
@@ -153,8 +153,8 @@ def configure(silent, verbose, apply_changes):
         clone_plugin_repositories()
         prune_unused_plugin_directories()
     else:
-        console.echo("\n  Run `apigee plugins update` to apply any changes,")
-        console.echo("    or rerun `apigee plugins configure` with `-a`")
+        console.echo(f"\n  Run `{APP} plugins update` to apply any changes,")
+        console.echo(f"    or rerun `{APP} plugins configure` with `-a`")
         console.echo("    to apply changes automatically.\n")
 
 
@@ -200,7 +200,7 @@ def show(
         for name, uri in sources.items():
             console.echo(f"{name}: {uri}")
         return
-    plugins_info_file = Path(MULTITOOL_PLUGINS_DIRECTORY) / name / "apigee-cli.info"
+    plugins_info_file = Path(MULTITOOL_PLUGINS_DIRECTORY) / name / f"{APP}-info.json"
     if not is_regular_file(plugins_info_file):
         return
     plugins_info = read_file_content(plugins_info_file, type="json")
