@@ -27,7 +27,6 @@ from multitool.utils import (
 )
 from multitool.verbose import common_verbose_options
 
-
 # ---- Global Variables ----
 plugins_command_help = 'Simple plugins manager for distributing commands.'
 
@@ -38,9 +37,8 @@ try:
     is_git_installed = True
 except ImportError:
     plugins_command_help = (
-    "Simple plugins manager for distributing commands. "
-    "[Warning: Git must be installed to use plugin commands]"
-)
+        "Simple plugins manager for distributing commands. "
+        "[Warning: Git must be installed to use plugin commands]")
 
 
 # ---- Helper Classes ----
@@ -93,7 +91,9 @@ class PluginManager:
             if is_directory(dest):
                 continue
             try:
-                console.echo(f"Installing {name}... ", line_ending="", should_flush=True)
+                console.echo(f"Installing {name}... ",
+                             line_ending="",
+                             should_flush=True)
                 Repo.clone_from(uri, dest)
                 console.echo("Done")
             except Exception as e:
@@ -113,25 +113,31 @@ class PluginManager:
             name = Path(path_).stem
             if name in sources:
                 return
-            console.echo(f"Removing {name}... ", line_ending="", should_flush=True)
+            console.echo(f"Removing {name}... ",
+                         line_ending="",
+                         should_flush=True)
             plugin_directory = Path(MULTITOOL_PLUGINS_DIRECTORY) / name
             try:
-                FileUtils.chmod_directory(str(Path(plugin_directory) / ".git"), stat.S_IRWXU)
+                FileUtils.chmod_directory(str(Path(plugin_directory) / ".git"),
+                                          stat.S_IRWXU)
                 shutil.rmtree(plugin_directory)
                 console.echo("Done")
             except Exception as e:
                 console.echo(e)
 
-        return execute_function_on_directory_files(
-            MULTITOOL_PLUGINS_DIRECTORY, _func, glob="[!.][!__]*"
-        )
+        return execute_function_on_directory_files(MULTITOOL_PLUGINS_DIRECTORY,
+                                                   _func,
+                                                   glob="[!.][!__]*")
 
     @staticmethod
     def update_repositories():
+
         def _func(path_):
             if not is_directory(path_):
                 return
-            console.echo(f"Updating {Path(path_).stem}... ", line_ending="", should_flush=True)
+            console.echo(f"Updating {Path(path_).stem}... ",
+                         line_ending="",
+                         should_flush=True)
             repo = Repo(path_)
             if repo.bare:
                 return
@@ -141,10 +147,10 @@ class PluginManager:
             except Exception as e:
                 console.echo(e)
 
-        return execute_function_on_directory_files(
-            MULTITOOL_PLUGINS_DIRECTORY, _func, glob="[!.][!__]*"
-        )
-    
+        return execute_function_on_directory_files(MULTITOOL_PLUGINS_DIRECTORY,
+                                                   _func,
+                                                   glob="[!.][!__]*")
+
     @staticmethod
     def list_sources(section="sources"):
         """Return a dictionary of plugin sources from config."""
@@ -154,7 +160,8 @@ class PluginManager:
     @staticmethod
     def get_plugin_info(name):
         """Return the parsed plugin info JSON or None if file missing."""
-        info_file = Path(MULTITOOL_PLUGINS_DIRECTORY) / name / f"{APP}-info.json"
+        info_file = Path(
+            MULTITOOL_PLUGINS_DIRECTORY) / name / f"{APP}-info.json"
         if not is_regular_file(info_file):
             return None
         return read_file_content(info_file, type="json")
@@ -164,10 +171,10 @@ class PluginManager:
         """Print the latest Git commit of a plugin repository."""
         GitUtils.exit_if_not_installed()
         repo = Repo(Path(MULTITOOL_PLUGINS_DIRECTORY) / name)
-        console.echo(repo.git.log(
-            "--pretty=format:%Cred%h%Creset -%C(yellow)%d%Creset %s "
-            "%Cgreen(%cr) %C(bold blue)<%an>%Creset", "-1"
-        ))
+        console.echo(
+            repo.git.log(
+                "--pretty=format:%Cred%h%Creset -%C(yellow)%d%Creset %s "
+                "%Cgreen(%cr) %C(bold blue)<%an>%Creset", "-1"))
 
     @staticmethod
     def print_dependencies(plugins_info):
@@ -225,7 +232,9 @@ def update(silent, verbose, section="sources"):
 @common_silent_options
 @common_verbose_options
 @click.option("-n", "--name", help="Name of the plugins package")
-@optgroup.group("Filter options", cls=MutuallyExclusiveOptionGroup, help="The filter options")
+@optgroup.group("Filter options",
+                cls=MutuallyExclusiveOptionGroup,
+                help="The filter options")
 @optgroup.option(
     "--show-commit-only/--no-show-commit-only",
     default=False,
@@ -236,7 +245,12 @@ def update(silent, verbose, section="sources"):
     default=False,
     help="Only print list of required packages",
 )
-def show(silent, verbose, name, section="sources", show_commit_only=False, show_dependencies_only=False):
+def show(silent,
+         verbose,
+         name,
+         section="sources",
+         show_commit_only=False,
+         show_dependencies_only=False):
     """Show plugins sources, info, commits, or dependencies based on options."""
 
     if not name:

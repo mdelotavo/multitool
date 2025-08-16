@@ -9,14 +9,16 @@ from multitool.cls import AliasedGroup
 from multitool.exceptions import wrap_with_exception_handling
 from multitool.plugins.commands import plugins
 from multitool.utils import (import_plugins_from_directory,
-                             execute_function_on_directory_files, configure_global_logger)
+                             execute_function_on_directory_files,
+                             configure_global_logger)
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
-@click.group(
-    context_settings=CONTEXT_SETTINGS, cls=AliasedGroup, invoke_without_command=False, chain=False
-)
+@click.group(context_settings=CONTEXT_SETTINGS,
+             cls=AliasedGroup,
+             invoke_without_command=False,
+             chain=False)
 @click.version_option(version, '-V', '--version')
 @click.pass_context
 def cli(ctx):
@@ -42,7 +44,7 @@ def main():
     execute_function_on_directory_files(
         MULTITOOL_PLUGINS_DIRECTORY,
         import_plugins_from_directory,
-        args=(cli_commands,),
+        args=(cli_commands, ),
         glob='[!.][!__]*/__init__.py',
     )
 

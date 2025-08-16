@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 from multitool.utils import show_message
 
+
 class TestUtils(TestCase):
 
     @patch('builtins.print')

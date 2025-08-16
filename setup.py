@@ -25,15 +25,9 @@ SETUP_ARGS = dict(
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3.7',
     ],
-    entry_points = {
-        'console_scripts': [
-            'multitool=multitool.__main__:main'
-        ]
-    },
-    install_requires = [
-        'click>=8.1.3',
-        'click-aliases>=1.0.1',
-        'click-option-group>=0.5.5',
+    entry_points={'console_scripts': ['multitool=multitool.__main__:main']},
+    install_requires=[
+        'click>=8.1.3', 'click-aliases>=1.0.1', 'click-option-group>=0.5.5',
         'gitpython>=3.1.30'
     ],
     python_requires=">=3.7",

@@ -2,15 +2,13 @@ import builtins
 import sys
 
 
-def echo(
-    *message,
-    exit_status=None,
-    make_silent=False,
-    current_verbosity=0,
-    expected_verbosity=0,
-    line_ending="\n",
-    should_flush=False
-):
+def echo(*message,
+         exit_status=None,
+         make_silent=False,
+         current_verbosity=0,
+         expected_verbosity=0,
+         line_ending="\n",
+         should_flush=False):
     toggle_silent = builtins.MULTITOOL_TOGGLE_SILENT
     toggle_verbose = builtins.MULTITOOL_TOGGLE_VERBOSE
     if make_silent or toggle_silent:
