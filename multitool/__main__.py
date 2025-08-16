@@ -8,9 +8,9 @@ from multitool import __version__ as version
 from multitool.cls import AliasedGroup
 from multitool.exceptions import wrap_with_exception_handling
 from multitool.plugins.commands import plugins
-from multitool.utils import (import_plugins_from_directory,
+from multitool.utils import (configure_global_logger,
                              execute_function_on_directory_files,
-                             configure_global_logger)
+                             import_plugins_from_directory)
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 

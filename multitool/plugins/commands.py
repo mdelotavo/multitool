@@ -9,22 +9,13 @@ from pathlib import Path
 import click
 from click_option_group import MutuallyExclusiveOptionGroup, optgroup
 
-from multitool import (
-    APP,
-    MULTITOOL_PLUGINS_CONFIG_FILE,
-    MULTITOOL_PLUGINS_DIRECTORY,
-    MULTITOOL_PLUGINS_PATH,
-    console,
-)
+from multitool import (APP, MULTITOOL_PLUGINS_CONFIG_FILE,
+                       MULTITOOL_PLUGINS_DIRECTORY, MULTITOOL_PLUGINS_PATH,
+                       console)
 from multitool.silent import common_silent_options
-from multitool.utils import (
-    is_directory,
-    is_regular_file,
-    create_directory,
-    read_file_content,
-    execute_function_on_directory_files,
-    create_empty_file,
-)
+from multitool.utils import (create_directory, create_empty_file,
+                             execute_function_on_directory_files, is_directory,
+                             is_regular_file, read_file_content)
 from multitool.verbose import common_verbose_options
 
 # ---- Global Variables ----
