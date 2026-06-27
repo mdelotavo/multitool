@@ -1,13 +1,7 @@
 multitool
 =========
 
-Multitool is a general-purpose command-line interface with plugins support.
-
---------------------
-Why does this exist?
---------------------
-
-I built this tool so I can quickly create and distribute command-line tools for consulting work and personal use.
+Quickly create and distribute command-line tools with plugins.
 
 -----
 Usage
@@ -17,17 +11,14 @@ Usage
 
     Usage: multitool [OPTIONS] COMMAND [ARGS]...
 
-      Welcome to the Multitool command-line interface!
-
-      PyPI:   https://pypi.org/project/multitool/
-      GitHub: https://github.com/mdelotavo/multitool
+      Quickly create and distribute command-line tools.
 
     Options:
       -V, --version  Show the version and exit.
       -h, --help     Show this message and exit.
 
     Commands:
-      plugins  Simple plugins manager for distributing commands.
+      plugins  Plugins manager for distributing commands.
 
 ----------------
 Managing plugins

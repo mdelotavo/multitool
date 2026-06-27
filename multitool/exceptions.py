@@ -18,9 +18,7 @@ def wrap_with_exception_handling(func):
             frm = inspect.trace()[-1]
             mod = inspect.getmodule(frm[0])
             modname = mod.__name__ if mod else frm[1]
-            sys.exit(
-                f'An exception of type {modname}.{type(e).__name__} occurred. Arguments:\n{e}'
-            )
+            sys.exit(f'An exception of type {modname}.{type(e).__name__} occurred. Arguments:\n{e}')
         except KeyboardInterrupt:
             console.echo()
             sys.exit(130)

@@ -10,11 +10,7 @@ from pathlib import Path
 import click
 
 
-def apply_function_on_iterable(iterable,
-                               func,
-                               state_op="append",
-                               args=(),
-                               kwargs=None):
+def apply_function_on_iterable(iterable, func, state_op="append", args=(), kwargs=None):
     if kwargs is None:
         kwargs = {}
     state = []
@@ -30,9 +26,9 @@ def configure_global_logger(log_file):
     create_empty_file(log_file)
     remove_file_if_above_size(log_file, size_kb=1000)
     logging.basicConfig(
-        filename=log_file,
-        level=logging.WARNING,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+      filename=log_file,
+      level=logging.WARNING,
+      format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
 
@@ -43,8 +39,7 @@ def create_empty_file(path):
             with open(path, "x"):
                 os.utime(path, None)
     except FileExistsError:
-        logging.warning(
-            f"{inspect.stack()[0][3]}; will ignore FileExistsError")
+        logging.warning(f"{inspect.stack()[0][3]}; will ignore FileExistsError")
 
 
 def create_directory(path):
@@ -54,20 +49,14 @@ def create_directory(path):
         try:
             os.makedirs(path)
         except FileExistsError:
-            logging.warning(
-                f"{inspect.stack()[0][3]}; will ignore FileExistsError")
+            logging.warning(f"{inspect.stack()[0][3]}; will ignore FileExistsError")
 
 
-def execute_function_on_directory_files(dir,
-                                        func,
-                                        glob="**/*",
-                                        args=(),
-                                        kwargs=None):
+def execute_function_on_directory_files(dir, func, glob="**/*", args=(), kwargs=None):
     if kwargs is None:
         kwargs = {}
     state = []
-    for file_path in Path(
-            get_resolved_directory_path(dir)).resolve().glob(glob):
+    for file_path in Path(get_resolved_directory_path(dir)).resolve().glob(glob):
         _tuple = (str(file_path), )
         result = func(*(_tuple + args), **kwargs)
         if result:
@@ -83,25 +72,22 @@ def get_resolved_directory_path(target_directory=None):
     return os.getcwd()
 
 
-def import_plugins_from_directory(plugins_init_file, existing_commands):
+def import_plugins_from_directory(init_file, commands):
     try:
-        spec = importlib.util.spec_from_file_location('plugins_modules',
-                                                      plugins_init_file)
+        spec = importlib.util.spec_from_file_location("plugins_modules", init_file)
         module = importlib.util.module_from_spec(spec)
         sys.modules[spec.name] = module
         spec.loader.exec_module(module)
-        import plugins_modules  # type: ignore
-        from plugins_modules import \
-            __all__ as all_plugins_modules  # type: ignore
 
-        for module in all_plugins_modules:
-            _module = getattr(plugins_modules, module)
-            if isinstance(_module, (click.core.Command, click.core.Group)):
-                existing_commands.add(_module)
+        plugins = getattr(module, "__all__", [])
+
+        for name in plugins:
+            obj = getattr(module, name)
+            if isinstance(obj, (click.Command, click.Group)):
+                commands.add(obj)
+
     except ImportError:
-        logging.warning(
-            f'{inspect.stack()[0][3]}; will skip loading plugin: {module}',
-            exc_info=True)
+        logging.warning("Failed to load plugin", exc_info=True)
 
 
 def is_directory(d):
