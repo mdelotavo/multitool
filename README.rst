@@ -1,7 +1,7 @@
 multitool
 =========
 
-Quickly create and distribute command-line tools with plugins.
+Create and run plugin-based command-line tools.
 
 -----
 Usage
@@ -11,140 +11,212 @@ Usage
 
     Usage: multitool [OPTIONS] COMMAND [ARGS]...
 
-      Quickly create and distribute command-line tools.
+      Create and run plugin-based command-line tools.
 
     Options:
       -V, --version  Show the version and exit.
       -h, --help     Show this message and exit.
 
     Commands:
-      plugins  Plugins manager for distributing commands.
+      plugins  Manage plugin repositories.
+      run      Run installed plugin commands.
 
 ----------------
 Managing plugins
 ----------------
 
-The simple plugins manager uses ``git`` to install commands from remote sources, thus you will need to have ``git`` installed for the installation of plugins to work.
+Plugins are distributed as Git repositories containing Click commands.
 
-If ``git`` is unavailable on your machine, then the ``plugins`` commands will be unavailable.
+The ``plugins`` command manages plugin repositories, while installed plugin
+commands are available under ``multitool run``.
 
-However, it is possible to manually install plugins by dragging them under its own directory: ``~/.multitool/plugins/PLUGIN_NAME/``.
+Git is required to install or update plugins. If Git is unavailable, the
+``plugins`` command cannot install repositories, although plugins can still be
+installed manually by copying them into::
 
-The tool revolves around the use of the `click`_ package to create command plugins which can be dynamically loaded into the ``multitool`` command-line at runtime.
+    ~/.multitool/plugins/PLUGIN_NAME/
 
-Currently, only the commands shown below are supported. More commands will be added to improve automation and user experience.
+^^^^^^^^^^^^^^^^
+Creating plugins
+^^^^^^^^^^^^^^^^
 
-The steps below show how to install commands from a `public plugins repository`_.
+Create a new plugin scaffold with::
+
+    multitool plugins new PLUGIN_NAME
+
+This creates a local plugin repository under::
+
+    ~/.multitool/plugins/PLUGIN_NAME/
+
+The generated structure includes::
+
+    PLUGIN_NAME/
+    ├── __init__.py
+    ├── plugin_<unique-id>.py
+    ├── multitool-info.json
+    ├── README.md
+    └── LICENSE
+
+The generated plugin contains a Click command group named
+``PLUGIN_NAME`` and an example ``hello`` command. Add additional commands
+to the generated ``plugin_<unique-id>.py`` module.
+
+Test the plugin locally with::
+
+    multitool run PLUGIN_NAME -h
+
+To distribute the plugin:
+
+1. Initialize the plugin directory as a Git repository::
+
+       cd ~/.multitool/plugins/PLUGIN_NAME
+       git init
+
+2. Commit and push it to a remote Git repository such as GitHub or GitLab.
+
+3. Add the repository URL to the Multitool configuration::
+
+       [sources]
+       PLUGIN_NAME = https://github.com/<user>/PLUGIN_NAME.git
+
+4. Install or update plugins::
+
+       multitool plugins update
+
+Alternatively, copy the plugin directory directly into another Multitool
+plugins directory to use it locally.
 
 ^^^^^^^^^^^
 Configuring
 ^^^^^^^^^^^
 
-To configure remote sources for installing plugins, run::
+Configure plugin repositories with::
 
     multitool plugins configure -a
 
-This will open a text editor so that you can specify the remote sources.
+This opens your editor to modify the plugin configuration. Omit ``-a`` if you
+don't want changes applied automatically.
 
-If you don't want changes to be automatically applied, then you can drop the ``-a`` option.
-
-When the editor opens, copy and paste the following example configuration::
+Example configuration::
 
     [sources]
     public = https://github.com/mdelotavo/multitool-plugins.git
 
-After saving the changes, the CLI will attempt to install the plugins from the specified Git URI.
-Here we use the HTTPS URI but you can also use SSH if you have configured it.
+After saving, Multitool clones each configured repository into::
 
-You can also specify multiple sources, as long as the key (``public`` in this case) is unique.
-The key will be the name of the repository on your local machine under ``~/.multitool/plugins/``.
+    ~/.multitool/plugins/
 
-If installation is successful, you should now see additional commands when you run ``multitool -h``
+You can configure multiple repositories as long as each key is unique.
 
 ^^^^^^^^^^
 Quickstart
 ^^^^^^^^^^
 
-You can run the following commands to install the example plugins::
+Install the example plugins::
 
     echo -e '[sources]\npublic = https://github.com/mdelotavo/multitool-plugins.git' >> ~/.multitool/plugins/config
+
     multitool plugins update
     multitool plugins show
     multitool plugins show -n public
     multitool plugins show -n public --show-commit-only
     multitool plugins show -n public --show-dependencies-only
     pip3 install $(multitool plugins show -n public --show-dependencies-only)
-    multitool examples -h
+
+    multitool run examples -h
 
 ^^^^^^^^
 Updating
 ^^^^^^^^
 
-If you specified the ``-a`` option when running ``multitool plugins configure`` then install will occur automatically.
-Otherwise you can run::
+Install new plugins and update existing ones::
 
-     multitool plugins update
-
-This will install and update plugins.
+    multitool plugins update
 
 ^^^^^^^
 Pruning
 ^^^^^^^
 
-If you remove plugins from the config file or comment them out, and you then specified the ``-a`` option when running ``multitool plugins configure`` then the removal of plugins will occur automatically.
-Otherwise you can run::
+Remove repositories no longer listed in the configuration::
 
-     multitool plugins prune
+    multitool plugins prune
 
 ^^^^^^^
 Showing
 ^^^^^^^
 
-To show the plugins you have configured, run::
+Show configured repositories::
 
-     multitool plugins show
+    multitool plugins show
 
-You can also run the following commands if you specify the plugin name::
+Or inspect a specific repository::
 
     multitool plugins show -n PLUGIN_NAME --show-commit-only
     multitool plugins show -n PLUGIN_NAME --show-dependencies-only
 
-Some plugins will not load if dependencies are not installed. You can run the following command to install them.
-In order for this to work, the plugin needs to have the ``Requires`` key in the JSON body of the ``multitool-info.json`` file.
-::
+If a plugin declares Python dependencies in ``multitool-info.json``, install
+them with::
 
     pip3 install $(multitool plugins show -n PLUGIN_NAME --show-dependencies-only)
 
-^^^^^^^^^^^^^^^
+---------------
 Troubleshooting
-^^^^^^^^^^^^^^^
+---------------
 
-If you encounter issues with plugins or commands, you can find more detailed debug information and error messages in the log file:
-::
+If a plugin fails to install or load, check the log file::
 
     ~/.multitool/multitool.log
 
-Reviewing this file can help you diagnose installation problems, missing dependencies, or Git-related errors.
+It contains installation, dependency, and Git-related errors.
 
-.. ..
-    ----------------------------
-    Create a virtual environment
-    ----------------------------
+-----------
+Limitations
+-----------
 
-    .. code-block:: text
+Plugin command names must be unique across all installed repositories.
 
-        pip3 install virtualenv
-        virtualenv venv
-        source venv/bin/activate
+To avoid naming conflicts, plugin modules should follow the convention of
+including the repository owner and repository name in the command name.
 
-        pip3 install -e .
-        python3 -m multitool -V
-        python3 -m multitool -h   # or just `multitool -h`
+For example, a repository configured as::
 
-        pip3 install -r requirements.txt
-        ./runtests.sh
+    [sources]
+    public = https://github.com/mdelotavo/multitool-plugins.git
 
-        deactivate
+should expose commands using a unique name such as::
+
+    mdelotavo-multitool-plugins
+
+This prevents duplicate command names when multiple repositories provide
+plugins with the same module name. If two plugins expose commands with the
+same name, only one can be loaded and the duplicate plugin will be skipped.
+
+If two repositories expose the same command name, Multitool will fail to load
+the duplicate plugin and raise an error similar to::
+
+    Duplicate plugin command "examples" found in
+    /home/user/.multitool/plugins/PLUGIN_NAME/__init__.py.
+    Already loaded from plugins_modules.examples
+
+To resolve the issue, remove the conflicting plugin repository from your local
+plugins directory::
+
+    ~/.multitool/plugins/PLUGIN_NAME/
+
+and remove the repository from the configured sources.
+
+You can edit the configuration file manually::
+
+    ~/.multitool/plugins/config
+
+or open it using::
+
+    multitool plugins configure
+
+After removing the conflicting repository, update the installed plugins::
+
+    multitool plugins update
+
 
 .. _`click`: https://click.palletsprojects.com/
 .. _`multitool-plugins`: https://github.com/mdelotavo/multitool-plugins

@@ -17,12 +17,12 @@ from multitool import (
 )
 from multitool.silent import common_silent_options
 from multitool.utils import (
-  create_directory,
-  create_empty_file,
-  execute_function_on_directory_files,
-  is_directory,
-  is_regular_file,
-  read_file_content,
+  mkdir,
+  touch,
+  for_each_file,
+  is_dir,
+  is_file,
+  read_file,
 )
 from multitool.verbose import common_verbose_options
 
@@ -30,10 +30,10 @@ try:
     from git import Repo
 
     HAS_GIT = True
-    HELP = "Plugins manager for distributing commands."
+    HELP = "Manage plugin repositories."
 except ImportError:
     HAS_GIT = False
-    HELP = "Plugins manager. Git is required."
+    HELP = "Manage plugin repositories. Git is required."
 
 
 def require_git():
@@ -42,9 +42,9 @@ def require_git():
 
 
 def init():
-    create_directory(MULTITOOL_PLUGINS_DIRECTORY)
-    create_empty_file(MULTITOOL_PLUGINS_PATH)
-    create_empty_file(MULTITOOL_PLUGINS_CONFIG_FILE)
+    mkdir(MULTITOOL_PLUGINS_DIRECTORY)
+    touch(MULTITOOL_PLUGINS_PATH)
+    touch(MULTITOOL_PLUGINS_CONFIG_FILE)
 
 
 def config(section="sources"):
@@ -57,10 +57,10 @@ def clone():
     init()
     for name, uri in config().items():
         dest = Path(MULTITOOL_PLUGINS_DIRECTORY) / name
-        if is_directory(dest):
+        if is_dir(dest):
             continue
 
-        console.echo(f"Installing {name}... ", line_ending="", should_flush=True)
+        console.echo(f"Installing {name}... ", end="", flush=True)
         try:
             Repo.clone_from(uri, dest)
             console.echo("Done")
@@ -71,10 +71,10 @@ def clone():
 def update_repos():
 
     def fn(p):
-        if not is_directory(p):
+        if not is_dir(p):
             return
 
-        console.echo(f"Updating {Path(p).stem}... ", line_ending="", should_flush=True)
+        console.echo(f"Updating {Path(p).stem}... ", end="", flush=True)
 
         try:
             repo = Repo(p)
@@ -84,29 +84,7 @@ def update_repos():
         except Exception as e:
             console.echo(e)
 
-    execute_function_on_directory_files(MULTITOOL_PLUGINS_DIRECTORY, fn, glob="[!.][!__]*")
-
-
-def prune():
-    sources = config()
-
-    def fn(p):
-        if not is_directory(p):
-            return
-
-        name = Path(p).stem
-        if name in sources:
-            return
-
-        console.echo(f"Removing {name}... ", line_ending="", should_flush=True)
-
-        try:
-            shutil.rmtree(p, onerror=_chmod)
-            console.echo("Done")
-        except Exception as e:
-            console.echo(e)
-
-    execute_function_on_directory_files(MULTITOOL_PLUGINS_DIRECTORY, fn, glob="[!.][!__]*")
+    for_each_file(MULTITOOL_PLUGINS_DIRECTORY, fn, glob="[!.][!__]*")
 
 
 def _chmod(func, p, _):
@@ -114,39 +92,38 @@ def _chmod(func, p, _):
     func(p)
 
 
-# def prune():
-#     sources = config()
+def prune_repos():
+    sources = config()
 
-#     def fn(p):
-#         if not is_directory(p):
-#             return
+    def fn(p):
+        if not is_dir(p):
+            return
 
-#         name = Path(p).stem
-#         if name in sources:
-#             return
+        name = Path(p).stem
+        if name in sources:
+            return
 
-#         console.echo(f"Removing {name}... ", line_ending="", should_flush=True)
+        console.echo(f"Removing {name}... ", end="", flush=True)
 
-#         try:
-#             shutil.rmtree(p, onexc=_chmod)
-#             console.echo("Done")
-#         except Exception as e:
-#             console.echo(e)
+        try:
+            try:
+                shutil.rmtree(p, onexc=_chmod)
+            except TypeError:
+                shutil.rmtree(p, onerror=_chmod)
+            console.echo("Done")
+        except Exception as e:
+            console.echo(e)
 
-#     execute_function_on_directory_files(PLUGINS_DIR, fn, glob="[!.][!__]*")
-
-# def _chmod(func, path, exc):
-#     os.chmod(path, stat.S_IRWXU)
-#     func(path)
+    for_each_file(MULTITOOL_PLUGINS_DIRECTORY, fn, glob="[!.][!__]*")
 
 
 def plugin_info(name):
     f = Path(MULTITOOL_PLUGINS_DIRECTORY) / name / f"{APP}-info.json"
 
-    if not is_regular_file(f):
+    if not is_file(f):
         return None
 
-    return read_file_content(f, type="json")
+    return read_file(f, type="json")
 
 
 def print_commit(name):
@@ -171,7 +148,7 @@ def configure(silent, verbose, apply_changes):
 
     if apply_changes:
         clone()
-        prune()
+        prune_repos()
     else:
         console.echo(f"\nRun `{APP} plugins update` to apply changes.\n")
 
@@ -219,6 +196,97 @@ def show(silent, verbose, name, show_commit_only, show_dependencies_only):
 @plugins.command()
 @common_silent_options
 @common_verbose_options
-def prune_cmd(silent, verbose):
+def prune(silent, verbose):
     require_git()
-    prune()
+    prune_repos()
+
+
+import uuid
+
+
+@plugins.command()
+@common_silent_options
+@common_verbose_options
+@click.argument("name")
+def new(silent, verbose, name):
+    init()
+
+    if not name.isidentifier():
+        console.echo(f'Invalid plugin name "{name}".')
+        sys.exit(1)
+
+    root = Path(MULTITOOL_PLUGINS_DIRECTORY) / name
+
+    if root.exists():
+        console.echo(f'Plugin "{name}" already exists.')
+        sys.exit(1)
+
+    module = f"plugin_{uuid.uuid4().hex}"
+
+    mkdir(root)
+
+    (root / "__init__.py").write_text(f"""plugins = []
+
+from .{module} import {name}
+plugins.append("{name}")
+
+__all__ = plugins
+""")
+
+    (
+      root / f"{module}.py"
+    ).write_text(f'''import click
+
+
+@click.group()
+def {name}():
+    """{name} plugin."""
+
+
+@{name}.command()
+def hello():
+    click.echo("Hello, world!")
+''')
+
+    (root / "multitool-info.json").write_text("""{
+  "Homepage": "",
+  "Requires": "",
+  "Maintainer": "",
+  "Description-en": ""
+}
+""")
+
+    touch(root / "README.md")
+    touch(root / "LICENSE")
+
+    console.echo(f'Created plugin "{name}" at:')
+    console.echo(f"  {root}")
+    console.echo()
+    console.echo("Generated module:")
+    console.echo(f"  {module}.py")
+    console.echo()
+    console.echo("Next steps:")
+    console.echo("  • Add commands to:")
+    console.echo(f"      {module}.py")
+    console.echo()
+    console.echo("  • To use this plugin locally:")
+    console.echo("      Copy the plugin directory into another Multitool")
+    console.echo("      plugins directory:")
+    console.echo("        ~/.multitool/plugins/")
+    console.echo()
+    console.echo("  • To distribute this plugin:")
+    console.echo("      1. Initialize a Git repository.")
+    console.echo("      2. Commit and push it to a remote source")
+    console.echo("         (GitHub, GitLab, or another Git server).")
+    console.echo("      3. Add the repository URL to your plugin config:")
+    console.echo(f"           {APP} plugins configure")
+    console.echo()
+    console.echo("         Example:")
+    console.echo()
+    console.echo("           [sources]")
+    console.echo(f"           {name} = https://github.com/<user>/{name}.git")
+    console.echo()
+    console.echo("         HTTPS and SSH Git URLs are supported.")
+    console.echo()
+    console.echo("      4. Install or update plugins:")
+    console.echo(f"           {APP} plugins update")

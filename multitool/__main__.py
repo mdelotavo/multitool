@@ -8,31 +8,42 @@ from multitool import __version__ as version
 from multitool.cls import AliasedGroup
 from multitool.exceptions import wrap_with_exception_handling
 from multitool.plugins.commands import plugins
-from multitool.utils import (configure_global_logger, execute_function_on_directory_files, import_plugins_from_directory)
+from multitool.utils import (configure_logger, for_each_file, load_plugins)
 
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, cls=AliasedGroup, invoke_without_command=False, chain=False)
-@click.version_option(version, '-V', '--version')
+@click.version_option(version, "-V", "--version")
 @click.pass_context
 def cli(ctx):
-    """Quickly create and distribute command-line tools."""
+    """Create and run plugin-based command-line tools."""
     ctx.ensure_object(dict)
+
+
+@click.group(cls=AliasedGroup)
+def run():
+    """Run installed plugin commands."""
+    pass
 
 
 @wrap_with_exception_handling
 def main():
-    configure_global_logger(MULTITOOL_LOG_FILE)
+    configure_logger(MULTITOOL_LOG_FILE)
 
-    cli_commands = {plugins}
+    cli_commands = {plugins, run}
 
-    execute_function_on_directory_files(
-      MULTITOOL_PLUGINS_DIRECTORY,
-      import_plugins_from_directory,
-      args=(cli_commands, ),
-      glob='[!.][!__]*/__init__.py',
+    run_commands = {}
+
+    for_each_file(
+        MULTITOOL_PLUGINS_DIRECTORY,
+        load_plugins,
+        args=(run_commands,),
+        glob="[!.][!__]*/__init__.py",
     )
+
+    for command in run_commands.values():
+        run.add_command(command)
 
     for command in cli_commands:
         cli.add_command(command)
@@ -40,5 +51,5 @@ def main():
     cli(prog_name=APP, obj={})
 
 
-if __name__ == '__main__':
-    main()  # pragma: no cover
+if __name__ == "__main__":
+    main()

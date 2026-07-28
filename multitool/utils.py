@@ -3,28 +3,15 @@ import inspect
 import json
 import logging
 import os
-import re
 import sys
 from pathlib import Path
 
 import click
 
 
-def apply_function_on_iterable(iterable, func, state_op="append", args=(), kwargs=None):
-    if kwargs is None:
-        kwargs = {}
-    state = []
-    for item in iterable:
-        _tuple = (item, )
-        result = func(*(_tuple + args), **kwargs)
-        if result:
-            getattr(state, state_op)(result)
-    return state
-
-
-def configure_global_logger(log_file):
-    create_empty_file(log_file)
-    remove_file_if_above_size(log_file, size_kb=1000)
+def configure_logger(log_file):
+    touch(log_file)
+    remove_if_large(log_file, size_kb=1000)
     logging.basicConfig(
       filename=log_file,
       level=logging.WARNING,
@@ -32,9 +19,9 @@ def configure_global_logger(log_file):
     )
 
 
-def create_empty_file(path):
+def touch(path):
     try:
-        create_directory(os.path.split(path)[0])
+        mkdir(os.path.split(path)[0])
         if not os.path.exists(path):
             with open(path, "x"):
                 os.utime(path, None)
@@ -42,7 +29,7 @@ def create_empty_file(path):
         logging.warning(f"{inspect.stack()[0][3]}; will ignore FileExistsError")
 
 
-def create_directory(path):
+def mkdir(path):
     if not path:
         return
     if not os.path.exists(path):
@@ -52,11 +39,11 @@ def create_directory(path):
             logging.warning(f"{inspect.stack()[0][3]}; will ignore FileExistsError")
 
 
-def execute_function_on_directory_files(dir, func, glob="**/*", args=(), kwargs=None):
+def for_each_file(dir, func, glob="**/*", args=(), kwargs=None):
     if kwargs is None:
         kwargs = {}
     state = []
-    for file_path in Path(get_resolved_directory_path(dir)).resolve().glob(glob):
+    for file_path in Path(resolve_dir(dir)).resolve().glob(glob):
         _tuple = (str(file_path), )
         result = func(*(_tuple + args), **kwargs)
         if result:
@@ -64,7 +51,7 @@ def execute_function_on_directory_files(dir, func, glob="**/*", args=(), kwargs=
     return state
 
 
-def get_resolved_directory_path(target_directory=None):
+def resolve_dir(target_directory=None):
     if target_directory:
         if not os.path.exists(target_directory):
             os.makedirs(target_directory)
@@ -72,9 +59,12 @@ def get_resolved_directory_path(target_directory=None):
     return os.getcwd()
 
 
-def import_plugins_from_directory(init_file, commands):
+def load_plugins(init_file, commands):
     try:
-        spec = importlib.util.spec_from_file_location("plugins_modules", init_file)
+        spec = importlib.util.spec_from_file_location(
+          "plugins_modules",
+          init_file,
+        )
         module = importlib.util.module_from_spec(spec)
         sys.modules[spec.name] = module
         spec.loader.exec_module(module)
@@ -83,43 +73,40 @@ def import_plugins_from_directory(init_file, commands):
 
         for name in plugins:
             obj = getattr(module, name)
-            if isinstance(obj, (click.Command, click.Group)):
-                commands.add(obj)
+
+            if not isinstance(obj, (click.Command, click.Group)):
+                continue
+
+            if name in commands:
+                raise Exception(f'Duplicate plugin command "{name}" found in '
+                                f"{init_file}. Already loaded from {commands[name].callback.__module__}")
+            # if name in commands:
+            #     raise RuntimeError(
+            #       f'Plugin name conflict: "{name}". '
+            #       f'Plugin command names must be unique across repositories. '
+            #       f'Consider prefixing commands with the repository name.'
+            #     )
+
+            commands[name] = obj
 
     except ImportError:
         logging.warning("Failed to load plugin", exc_info=True)
 
 
-def is_directory(d):
+def is_dir(d):
     return os.path.isdir(d)
 
 
-def is_regular_file(f):
+def is_file(f):
     return os.path.isfile(f)
 
 
-def is_truthy_envvar(value):
-    return value in (True, "True", "true", "1")
-
-
-def join_path_components(*components):
-    if not components:
-        return
-    path = None
-    for component in components:
-        if not path:
-            path = Path(component)
-        else:
-            path /= component
-    return str(path)
-
-
-def read_file_content(file, type="text"):
+def read_file(file, type="text"):
     with open(file, "r") as f:
         return json.loads(f.read()) if type == "json" else f.read()
 
 
-def remove_file_if_above_size(file, size_kb=100):
+def remove_if_large(file, size_kb=100):
     if os.path.getsize(file) > size_kb * 1024:
         os.remove(file)
 
