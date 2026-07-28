@@ -78,14 +78,37 @@ def load_plugins(init_file, commands):
                 continue
 
             if name in commands:
-                raise Exception(f'Duplicate plugin command "{name}" found in '
-                                f"{init_file}. Already loaded from {commands[name].callback.__module__}")
-            # if name in commands:
-            #     raise RuntimeError(
-            #       f'Plugin name conflict: "{name}". '
-            #       f'Plugin command names must be unique across repositories. '
-            #       f'Consider prefixing commands with the repository name.'
-            #     )
+                existing = commands[name]
+
+                raise RuntimeError(
+                  f"""
+Duplicate plugin command detected.
+
+Command:
+  {name}
+
+Existing plugin:
+  {existing.callback.__module__}
+
+Conflicting plugin:
+  {init_file}
+
+Plugin command names must be unique across all installed repositories.
+
+To resolve this:
+  1. Delete one of the conflicting plugin repositories.
+  2. If the repository was installed from a remote source, remove or comment
+     out its entry in ~/.multitool/plugins/config (or run
+     `multitool plugins configure`) before running
+     `multitool plugins update` again, otherwise it will be reinstalled.
+  3. Run the command again.
+  4. If another duplicate plugin error appears, repeat these steps until no
+     duplicate plugin command errors remain.
+
+Suggested command:
+  rm -rf {Path(init_file).parent}
+""".strip()
+                )
 
             commands[name] = obj
 

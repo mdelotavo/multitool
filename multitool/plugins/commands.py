@@ -75,17 +75,32 @@ def update_repos():
         if not is_dir(p):
             return
 
-        console.echo(f"Updating {Path(p).stem}... ", end="", flush=True)
+        name = Path(p).stem
+
+        console.echo(f"Updating {name}... ", end="", flush=True)
 
         try:
             repo = Repo(p)
-            if not repo.bare:
-                repo.remotes["origin"].pull()
-            console.echo("Done")
-        except Exception as e:
-            console.echo(e)
 
-    for_each_file(MULTITOOL_PLUGINS_DIRECTORY, fn, glob="[!.][!__]*")
+            if repo.bare:
+                console.echo("Skipped (bare repository)")
+                return
+
+            if not repo.remotes:
+                console.echo("Skipped (Git repository has no remote)")
+                return
+
+            repo.remotes["origin"].pull()
+            console.echo("Done")
+
+        except Exception:
+            console.echo("Skipped (not a Git repository)")
+
+    for_each_file(
+      MULTITOOL_PLUGINS_DIRECTORY,
+      fn,
+      glob="[!.][!__]*",
+    )
 
 
 def _chmod(func, p, _):
@@ -180,13 +195,43 @@ def update(silent, verbose):
 @optgroup.option("--show-commit-only/--no-show-commit-only", default=False)
 @optgroup.option("--show-dependencies-only/--no-show-dependencies-only", default=False)
 def show(silent, verbose, name, show_commit_only, show_dependencies_only):
+    sources = config()
+
     if not name:
-        for k, v in config().items():
+        for k, v in sources.items():
             console.echo(f"{k}: {v}")
+
+        plugins = []
+
+        def fn(p):
+            if is_dir(p):
+                plugins.append(Path(p).stem)
+
+        for_each_file(
+          MULTITOOL_PLUGINS_DIRECTORY,
+          fn,
+          glob="[!.][!__]*",
+        )
+
+        unmanaged = set(plugins) - set(sources)
+
+        if unmanaged:
+            console.echo()
+            console.echo("Note:")
+            console.echo("The following local plugins are not configured as sources:")
+            for plugin in sorted(unmanaged):
+                console.echo(f"  {plugin}")
+
+            console.echo()
+            console.echo("These plugins will remain installed locally but will not "
+                         "be updated or removed by the plugin manager.")
+
         return
 
     info = plugin_info(name)
+
     if not info:
+        console.echo(f'Plugin "{name}" not found.')
         return
 
     if show_commit_only:
