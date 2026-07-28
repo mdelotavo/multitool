@@ -3,6 +3,7 @@ import os
 import shutil
 import stat
 import sys
+import uuid
 from pathlib import Path
 
 import click
@@ -100,7 +101,15 @@ def prune_repos():
             return
 
         name = Path(p).stem
+
         if name in sources:
+            return
+
+        repo = Path(p) / ".git"
+
+        if not repo.exists():
+            console.echo(f"Skipping {name}: local plugin directory without Git metadata.")
+            console.echo("Remove it manually if it is no longer required.")
             return
 
         console.echo(f"Removing {name}... ", end="", flush=True)
@@ -110,6 +119,7 @@ def prune_repos():
                 shutil.rmtree(p, onexc=_chmod)
             except TypeError:
                 shutil.rmtree(p, onerror=_chmod)
+
             console.echo("Done")
         except Exception as e:
             console.echo(e)
@@ -201,9 +211,6 @@ def prune(silent, verbose):
     prune_repos()
 
 
-import uuid
-
-
 @plugins.command()
 @common_silent_options
 @common_verbose_options
@@ -233,20 +240,101 @@ plugins.append("{name}")
 __all__ = plugins
 """)
 
-    (
-      root / f"{module}.py"
-    ).write_text(f'''import click
+    (root / f"{module}.py").write_text(
+      f'''import click
 
 
 @click.group()
 def {name}():
-    """{name} plugin."""
+    """Example Click plugin template."""
+    pass
 
 
 @{name}.command()
-def hello():
-    click.echo("Hello, world!")
-''')
+@click.argument(
+    "message",
+)
+@click.option(
+    "--count",
+    "-c",
+    type=int,
+    default=1,
+    show_default=True,
+    help="Number of times to print the message.",
+)
+@click.option(
+    "--format",
+    "output_format",
+    type=click.Choice(["text", "json"]),
+    default="text",
+    show_default=True,
+    help="Output format.",
+)
+@click.option(
+    "--verbose",
+    "-v",
+    count=True,
+    help="Increase verbosity level.",
+)
+@click.option(
+    "--enabled/--disabled",
+    default=True,
+    help="Enable or disable the operation.",
+)
+@click.option(
+    "--tag",
+    "-t",
+    multiple=True,
+    help="Specify multiple tags.",
+)
+@click.option(
+    "--output",
+    "-o",
+    type=click.Path(),
+    help="Optional output file.",
+)
+@click.argument(
+    "input_file",
+    required=False,
+    type=click.File("r"),
+)
+def hello(
+    message,
+    count,
+    output_format,
+    verbose,
+    enabled,
+    tag,
+    output,
+    input_file,
+):
+    """Example command showing common Click arguments and options."""
+
+    result = {{
+        "message": message,
+        "count": count,
+        "format": output_format,
+        "verbose": verbose,
+        "enabled": enabled,
+        "tags": tag,
+        "output": output,
+        "input": input_file.name if input_file else None,
+    }}
+
+    if output_format == "json":
+        import json
+        result = json.dumps(result, indent=2)
+
+    else:
+        result = str(result)
+
+    if output:
+        with open(output, "w") as f:
+            f.write(result)
+    else:
+        click.echo(result)
+'''
+    )
 
     (root / "multitool-info.json").write_text("""{
   "Homepage": "",

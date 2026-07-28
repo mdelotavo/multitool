@@ -36,10 +36,10 @@ def main():
     run_commands = {}
 
     for_each_file(
-        MULTITOOL_PLUGINS_DIRECTORY,
-        load_plugins,
-        args=(run_commands,),
-        glob="[!.][!__]*/__init__.py",
+      MULTITOOL_PLUGINS_DIRECTORY,
+      load_plugins,
+      args=(run_commands, ),
+      glob="[!.][!__]*/__init__.py",
     )
 
     for command in run_commands.values():
