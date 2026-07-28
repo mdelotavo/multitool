@@ -4,6 +4,38 @@ multitool
 Create and run plugin-based command-line tools.
 
 -----
+TL;DR
+-----
+
+This section shows how to start prototyping plugins on your local machine.
+See the sections below to learn how to distribute your commands as remote
+plugins that can be installed and updated from Git repositories.
+
+Create a new local plugin::
+
+    multitool plugins new test
+
+Show the generated command help::
+
+    multitool run test hello --help
+
+Run the example command::
+
+    multitool run test hello \
+        "Hello, World!" \
+        --count 3 \
+        --format json \
+        -vv \
+        --enabled \
+        --tag alpha \
+        --tag beta \
+        --output result.json
+
+Edit the generated source code::
+
+    vim ~/.multitool/plugins/test/plugin_*.py
+
+-----
 Usage
 -----
 
