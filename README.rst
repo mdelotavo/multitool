@@ -219,35 +219,13 @@ should expose commands using a unique name such as::
 
     mdelotavo-multitool-plugins
 
-This prevents duplicate command names when multiple repositories provide
-plugins with the same module name. If two plugins expose commands with the
-same name, only one can be loaded and the duplicate plugin will be skipped.
+This reduces the likelihood of collisions when multiple repositories expose
+plugins with the same command name.
 
-If two repositories expose the same command name, Multitool will fail to load
-the duplicate plugin and raise an error similar to::
-
-    Duplicate plugin command "examples" found in
-    /home/user/.multitool/plugins/PLUGIN_NAME/__init__.py.
-    Already loaded from plugins_modules.examples
-
-To resolve the issue, remove the conflicting plugin repository from your local
-plugins directory::
-
-    ~/.multitool/plugins/PLUGIN_NAME/
-
-and remove the repository from the configured sources.
-
-You can edit the configuration file manually::
-
-    ~/.multitool/plugins/config
-
-or open it using::
-
-    multitool plugins configure
-
-After removing the conflicting repository, update the installed plugins::
-
-    multitool plugins update
+If duplicate command names are detected, Multitool will display an error
+prompting you to delete the detected conflicting plugin repositories and, if
+applicable, remove the corresponding remote sources from your plugin
+configuration.
 
 
 .. _`click`: https://click.palletsprojects.com/
