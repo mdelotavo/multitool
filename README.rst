@@ -124,10 +124,18 @@ Configuring
 
 Configure plugin repositories with::
 
-    multitool plugins configure -a
+    multitool plugins configure
 
-This opens your editor to modify the plugin configuration. Omit ``-a`` if you
-don't want changes applied automatically.
+This opens your editor to modify the plugin configuration. After saving your
+changes, apply them with::
+
+    multitool plugins update
+
+To automatically apply the configuration changes after saving and closing the
+file (install new plugins, update existing plugins, and prune removed plugins),
+use::
+
+    multitool plugins configure -a
 
 Example configuration::
 
@@ -149,11 +157,11 @@ Install the example plugins::
     echo -e '[sources]\nmdelotavo-multitool-plugins = https://github.com/mdelotavo/multitool-plugins.git' >> ~/.multitool/plugins/config
 
     multitool plugins update
+    
     multitool plugins show
     multitool plugins show -n mdelotavo-multitool-plugins
     multitool plugins show -n mdelotavo-multitool-plugins --show-commit-only
     multitool plugins show -n mdelotavo-multitool-plugins --show-dependencies-only
-    pip3 install $(multitool plugins show -n mdelotavo-multitool-plugins --show-dependencies-only)
 
     multitool run examples -h
 
@@ -161,18 +169,51 @@ Install the example plugins::
 Updating
 ^^^^^^^^
 
-Install new plugins and update existing ones::
+Install new plugins, update existing ones, and automatically install any Python
+dependencies declared in the Requires field of the plugin's
+multitool-info.json file::
 
     multitool plugins update
 
 Update a specific plugin only::
 
-    multitool plugins update --name <plugin>
+    multitool plugins update -n PLUGIN_NAME
 
-If any dependencies could not be installed automatically, install them manually
-using::
+The Requires field is where a plugin declares the Python packages it
+depends on. Any packages listed will be installed automatically when
+multitool plugins update is run. For example::
 
-    pip3 install $(multitool plugins show -n PLUGIN_NAME --show-dependencies-only)
+  {
+    "Homepage": "",
+    "Requires": "click>=8.1.3 click-aliases>=1.0.1 click-option-group>=0.5.5 GitPython>=3.1.30",
+    "Maintainer": "",
+    "Description-en": ""
+  }
+
+If one or more dependencies could not be installed automatically, multitool
+will report the failures and display the appropriate pip command to install
+the remaining packages manually. For example::
+
+    Updating mdelotavo-multitool-plugins... Done
+
+    Installing GitPython>=3.1.30... Done
+    Installing click-aliases>=1.0.1... Done
+    Installing click-option-group>=0.5.5... Done
+    Installing click>=8.1.3... Done
+    Installing asdfasdfasdf... Failed
+    Installing qwerqwerqwer>=8.1.3... Failed
+    Installing tabulate>=0.9.0... Done
+
+    The following dependencies could not be installed automatically:
+      asdfasdfasdf
+      qwerqwerqwer>=8.1.3
+
+    Try installing them manually:
+      /usr/bin/python3 -m pip install asdfasdfasdf qwerqwerqwer>=8.1.3
+
+You can also display a plugin's declared dependencies at any time::
+
+    multitool plugins show --name PLUGIN_NAME --show-dependencies-only
 
 ^^^^^^^
 Pruning
