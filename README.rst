@@ -165,6 +165,15 @@ Install new plugins and update existing ones::
 
     multitool plugins update
 
+Update a specific plugin only::
+
+    multitool plugins update --name <plugin>
+
+If any dependencies could not be installed automatically, install them manually
+using::
+
+    pip3 install $(multitool plugins show -n PLUGIN_NAME --show-dependencies-only)
+
 ^^^^^^^
 Pruning
 ^^^^^^^
@@ -185,11 +194,6 @@ Or inspect a specific repository::
 
     multitool plugins show -n PLUGIN_NAME --show-commit-only
     multitool plugins show -n PLUGIN_NAME --show-dependencies-only
-
-If a plugin declares Python dependencies in ``multitool-info.json``, install
-them with::
-
-    pip3 install $(multitool plugins show -n PLUGIN_NAME --show-dependencies-only)
 
 ---------------
 Troubleshooting

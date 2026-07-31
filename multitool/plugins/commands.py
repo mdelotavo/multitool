@@ -4,6 +4,9 @@ import shutil
 import stat
 import sys
 import uuid
+import shutil
+import subprocess
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 
 import click
@@ -69,32 +72,147 @@ def clone():
             console.echo(e)
 
 
-def update_repos():
+def pip_command():
+    if sys.executable:
+        return [sys.executable, "-m", "pip"]
 
-    def fn(p):
-        if not is_dir(p):
-            return
+    if shutil.which("pip"):
+        return ["pip"]
 
-        name = Path(p).stem
+    if shutil.which("pip3"):
+        return ["pip3"]
 
-        console.echo(f"Updating {name}... ", end="", flush=True)
+    return None
+
+
+def package_installed(package):
+    try:
+        version(package)
+        return True
+    except PackageNotFoundError:
+        return False
+
+
+def parse_requires(info):
+    requires = info.get("Requires")
+
+    if not requires:
+        return []
+
+    if isinstance(requires, str):
+        return requires.split()
+
+    if isinstance(requires, (list, tuple, set)):
+        return [str(r).strip() for r in requires if str(r).strip()]
+
+    return []
+
+
+def install_plugin_dependencies(name=None):
+    cmd = pip_command()
+
+    if cmd is None:
+        console.echo("Unable to locate pip.")
+        return
+
+    required = set()
+
+    def add_dependencies(plugin_name):
+        info = plugin_info(plugin_name)
+
+        if info:
+            required.update(parse_requires(info))
+
+    if name:
+        path = Path(MULTITOOL_PLUGINS_DIRECTORY) / name
+
+        if not is_dir(path):
+            console.echo(f'Plugin "{name}" not found.')
+            sys.exit(1)
+
+        add_dependencies(name)
+
+    else:
+
+        def fn(path):
+            if is_dir(path):
+                add_dependencies(Path(path).stem)
+
+        for_each_file(
+          MULTITOOL_PLUGINS_DIRECTORY,
+          fn,
+          glob="[!.][!__]*",
+        )
+
+    failed = []
+
+    for package in sorted(required):
+        if package_installed(package):
+            continue
+
+        console.echo(f"Installing {package}... ", end="", flush=True)
+
+        result = subprocess.run(
+          cmd + ["install", package],
+          stdout=subprocess.DEVNULL,
+          stderr=subprocess.DEVNULL,
+        )
+
+        if result.returncode == 0:
+            console.echo("Done")
+        else:
+            console.echo("Failed")
+            failed.append(package)
+
+    if failed:
+        console.echo()
+        console.echo("The following dependencies could not be installed automatically:")
+
+        for package in failed:
+            console.echo(f"  {package}")
+
+        console.echo()
+        console.echo("Try installing them manually:")
+        console.echo(f"  {' '.join(cmd)} install {' '.join(failed)}")
+
+
+def update_repos(name=None):
+
+    def update_repo(path):
+        plugin_name = Path(path).stem
+
+        console.echo(f"Updating {plugin_name}... ", end="", flush=True)
 
         try:
-            repo = Repo(p)
+            repo = Repo(path)
 
             if repo.bare:
-                console.echo("Skipped (bare repository)")
+                console.echo("Skipped Git pull (bare repository)")
                 return
 
             if not repo.remotes:
-                console.echo("Skipped (Git repository has no remote)")
+                console.echo("Skipped Git pull (Git repository has no remote)")
                 return
 
             repo.remotes["origin"].pull()
             console.echo("Done")
 
         except Exception:
-            console.echo("Skipped (not a Git repository)")
+            console.echo("Skipped Git pull (not a Git repository)")
+
+    if name:
+        path = Path(MULTITOOL_PLUGINS_DIRECTORY) / name
+
+        if not is_dir(path):
+            console.echo(f'Plugin "{name}" not found.')
+            sys.exit(1)
+
+        update_repo(path)
+        return
+
+    def fn(path):
+        if is_dir(path):
+            update_repo(path)
 
     for_each_file(
       MULTITOOL_PLUGINS_DIRECTORY,
@@ -181,10 +299,12 @@ def configure(silent, verbose, apply_changes):
 @plugins.command()
 @common_silent_options
 @common_verbose_options
-def update(silent, verbose):
+@click.option("-n", "--name")
+def update(silent, verbose, name):
     require_git()
     clone()
-    update_repos()
+    update_repos(name)
+    install_plugin_dependencies(name)
 
 
 @plugins.command()
@@ -260,7 +380,36 @@ def prune(silent, verbose):
 @common_silent_options
 @common_verbose_options
 @click.argument("name")
-def new(silent, verbose, name):
+@click.option(
+  "--requires-format",
+  type=click.Choice(["array", "string"], case_sensitive=False),
+  default="string",
+  show_default=True,
+  help="Format to use for the Requires field.",
+)
+def new(silent, verbose, name, requires_format):
+    if requires_format == "array":
+        info = """{
+  "Homepage": "",
+  "Requires": [
+    "click>=8.1.3",
+    "click-aliases>=1.0.1",
+    "click-option-group>=0.5.5",
+    "GitPython>=3.1.30"
+  ],
+  "Maintainer": "",
+  "Description-en": ""
+}
+"""
+    elif requires_format == "string":
+        info = """{
+  "Homepage": "",
+  "Requires": "click>=8.1.3 click-aliases>=1.0.1 click-option-group>=0.5.5 GitPython>=3.1.30",
+  "Maintainer": "",
+  "Description-en": ""
+}
+"""
+
     init()
 
     if not name.isidentifier():
@@ -381,13 +530,7 @@ def hello(
 '''
     )
 
-    (root / f"{APP}-info.json").write_text("""{
-  "Homepage": "",
-  "Requires": "click",
-  "Maintainer": "",
-  "Description-en": ""
-}
-""")
+    (root / f"{APP}-info.json").write_text(info)
 
     touch(root / "README.md")
     touch(root / "LICENSE")
