@@ -3,9 +3,9 @@ multitool
 
 Create and run plugin-based command-line tools.
 
------
-TL;DR
------
+----------
+Quickstart
+----------
 
 This section shows how to start prototyping plugins on your local machine.
 See the sections below to learn how to distribute your commands as remote
@@ -132,7 +132,7 @@ don't want changes applied automatically.
 Example configuration::
 
     [sources]
-    public = https://github.com/mdelotavo/multitool-plugins.git
+    mdelotavo-multitool-plugins = https://github.com/mdelotavo/multitool-plugins.git
 
 After saving, Multitool clones each configured repository into::
 
@@ -141,19 +141,19 @@ After saving, Multitool clones each configured repository into::
 You can configure multiple repositories as long as each key is unique.
 
 ^^^^^^^^^^
-Quickstart
+Installing
 ^^^^^^^^^^
 
 Install the example plugins::
 
-    echo -e '[sources]\npublic = https://github.com/mdelotavo/multitool-plugins.git' >> ~/.multitool/plugins/config
+    echo -e '[sources]\nmdelotavo-multitool-plugins = https://github.com/mdelotavo/multitool-plugins.git' >> ~/.multitool/plugins/config
 
     multitool plugins update
     multitool plugins show
-    multitool plugins show -n public
-    multitool plugins show -n public --show-commit-only
-    multitool plugins show -n public --show-dependencies-only
-    pip3 install $(multitool plugins show -n public --show-dependencies-only)
+    multitool plugins show -n mdelotavo-multitool-plugins
+    multitool plugins show -n mdelotavo-multitool-plugins --show-commit-only
+    multitool plugins show -n mdelotavo-multitool-plugins --show-dependencies-only
+    pip3 install $(multitool plugins show -n mdelotavo-multitool-plugins --show-dependencies-only)
 
     multitool run examples -h
 
@@ -213,7 +213,7 @@ including the repository owner and repository name in the command name.
 For example, a repository configured as::
 
     [sources]
-    public = https://github.com/mdelotavo/multitool-plugins.git
+    mdelotavo-multitool-plugins = https://github.com/mdelotavo/multitool-plugins.git
 
 should expose commands using a unique name such as::
 

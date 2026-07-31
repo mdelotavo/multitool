@@ -13,7 +13,7 @@ from multitool import (
   APP,
   MULTITOOL_PLUGINS_CONFIG_FILE,
   MULTITOOL_PLUGINS_DIRECTORY,
-  MULTITOOL_PLUGINS_PATH,
+  MULTITOOL_PLUGINS_INIT_FILE,
   console,
 )
 from multitool.silent import common_silent_options
@@ -44,7 +44,7 @@ def require_git():
 
 def init():
     mkdir(MULTITOOL_PLUGINS_DIRECTORY)
-    touch(MULTITOOL_PLUGINS_PATH)
+    touch(MULTITOOL_PLUGINS_INIT_FILE)
     touch(MULTITOOL_PLUGINS_CONFIG_FILE)
 
 

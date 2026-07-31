@@ -8,7 +8,7 @@ from multitool import __version__ as version
 from multitool.cls import AliasedGroup
 from multitool.exceptions import wrap_with_exception_handling
 from multitool.plugins.commands import plugins
-from multitool.utils import (configure_logger, for_each_file, load_plugins)
+from multitool.utils import (configure_root_logger, for_each_file, load_plugins)
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -29,7 +29,7 @@ def run():
 
 @wrap_with_exception_handling
 def main():
-    configure_logger(MULTITOOL_LOG_FILE)
+    configure_root_logger(MULTITOOL_LOG_FILE)
 
     cli_commands = {plugins, run}
 
