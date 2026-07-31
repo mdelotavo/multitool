@@ -381,7 +381,7 @@ def hello(
 '''
     )
 
-    (root / "multitool-info.json").write_text("""{
+    (root / f"{APP}-info.json").write_text("""{
   "Homepage": "",
   "Requires": "click",
   "Maintainer": "",
@@ -403,9 +403,9 @@ def hello(
     console.echo(f"      {module}.py")
     console.echo()
     console.echo("  • To use this plugin locally:")
-    console.echo("      Copy the plugin directory into another Multitool")
+    console.echo(f"      Copy the plugin directory into another {APP}")
     console.echo("      plugins directory:")
-    console.echo("        ~/.multitool/plugins/")
+    console.echo(f"        ~/.{APP}/plugins/")
     console.echo()
     console.echo("  • To distribute this plugin:")
     console.echo("      1. Initialize a Git repository.")

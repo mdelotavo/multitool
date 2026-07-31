@@ -8,6 +8,8 @@ from pathlib import Path
 
 import click
 
+from multitool import APP
+
 
 def configure_root_logger(log_file):
     touch(log_file)
@@ -98,9 +100,9 @@ Plugin command names must be unique across all installed repositories.
 To resolve this:
   1. Delete one of the conflicting plugin repositories.
   2. If the repository was installed from a remote source, remove or comment
-     out its entry in ~/.multitool/plugins/config (or run
-     `multitool plugins configure`) before running
-     `multitool plugins update` again, otherwise it will be reinstalled.
+     out its entry in ~/.{APP}/plugins/config (or run
+     `{APP} plugins configure`) before running
+     `{APP} plugins update` again, otherwise it will be reinstalled.
   3. Run the command again.
   4. If another duplicate plugin error appears, repeat these steps until no
      duplicate plugin command errors remain.
