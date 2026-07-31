@@ -8,7 +8,6 @@ from pathlib import Path
 
 from multitool.utils_init import join_path
 
-
 # Runtime configuration
 MULTITOOL_TOGGLE_SILENT = False
 MULTITOOL_TOGGLE_VERBOSE = 0

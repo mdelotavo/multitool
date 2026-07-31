@@ -383,7 +383,7 @@ def hello(
 
     (root / "multitool-info.json").write_text("""{
   "Homepage": "",
-  "Requires": "",
+  "Requires": "click",
   "Maintainer": "",
   "Description-en": ""
 }
