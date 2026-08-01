@@ -148,6 +148,7 @@ def install_plugin_dependencies(name=None):
 
     for package in sorted(required):
         if package_installed(package):
+            console.echo(f"Checked {package}... Already installed")
             continue
 
         console.echo(f"Installing {package}... ", end="", flush=True)
