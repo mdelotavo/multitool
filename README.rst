@@ -28,8 +28,7 @@ Run the example command::
         -vv \
         --enabled \
         --tag alpha \
-        --tag beta \
-        --output result.json
+        --tag beta
 
 Edit the generated source code::
 
