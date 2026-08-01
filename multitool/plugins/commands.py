@@ -4,7 +4,6 @@ import shutil
 import stat
 import sys
 import uuid
-import shutil
 import subprocess
 from importlib.metadata import PackageNotFoundError, version
 from packaging.requirements import Requirement
