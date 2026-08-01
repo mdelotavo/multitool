@@ -7,6 +7,7 @@ import uuid
 import shutil
 import subprocess
 from importlib.metadata import PackageNotFoundError, version
+from packaging.requirements import Requirement
 from pathlib import Path
 
 import click
@@ -108,6 +109,17 @@ def parse_requires(info):
     return []
 
 
+def package_status(requirement):
+    req = Requirement(requirement)
+
+    try:
+        installed = version(req.name)
+    except PackageNotFoundError:
+        return req, None, False
+
+    return req, installed, req.specifier.contains(installed, prereleases=True)
+
+
 def install_plugin_dependencies(name=None):
     cmd = pip_command()
 
@@ -146,15 +158,29 @@ def install_plugin_dependencies(name=None):
 
     failed = []
 
-    for package in sorted(required):
-        if package_installed(package):
-            console.echo(f"Checked {package}... Already installed")
+    for requirement in sorted(required):
+        req, installed, satisfied = package_status(requirement)
+
+        if satisfied:
+            console.echo(f"Checked {req.name} ({requirement})... "
+                         f"{installed} installed")
             continue
 
-        console.echo(f"Installing {package}... ", end="", flush=True)
+        if installed is None:
+            console.echo(
+              f"Installing {requirement}... ",
+              end="",
+              flush=True,
+            )
+        else:
+            console.echo(
+              f"Updating {req.name} ({installed} -> {requirement})... ",
+              end="",
+              flush=True,
+            )
 
         result = subprocess.run(
-          cmd + ["install", package],
+          cmd + ["install", requirement],
           stdout=subprocess.DEVNULL,
           stderr=subprocess.DEVNULL,
         )
@@ -163,14 +189,14 @@ def install_plugin_dependencies(name=None):
             console.echo("Done")
         else:
             console.echo("Failed")
-            failed.append(package)
+            failed.append(requirement)
 
     if failed:
         console.echo()
         console.echo("The following dependencies could not be installed automatically:")
 
-        for package in failed:
-            console.echo(f"  {package}")
+        for requirement in failed:
+            console.echo(f"  {requirement}")
 
         console.echo()
         console.echo("Try installing them manually:")
@@ -304,7 +330,12 @@ def configure(silent, verbose, apply_changes):
 def update(silent, verbose, name):
     require_git()
     clone()
+    console.echo("Updating plugins")
+    console.echo("----------------")
     update_repos(name)
+    console.echo()
+    console.echo("Checking Python package dependencies")
+    console.echo("------------------------------------")
     install_plugin_dependencies(name)
 
 

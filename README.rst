@@ -194,15 +194,20 @@ If one or more dependencies could not be installed automatically, multitool
 will report the failures and display the appropriate pip command to install
 the remaining packages manually. For example::
 
+    Updating plugins
+    ----------------
     Updating mdelotavo-multitool-plugins... Done
+    Updating test... Skipped Git pull (not a Git repository)
 
-    Installing GitPython>=3.1.30... Done
-    Installing click-aliases>=1.0.1... Done
-    Installing click-option-group>=0.5.5... Done
-    Installing click>=8.1.3... Done
+    Checking Python package dependencies
+    ------------------------------------
+    Checked GitPython (GitPython>=3.1.30)... 3.1.50 installed
     Installing asdfasdfasdf... Failed
+    Checked click-aliases (click-aliases>=1.0.1)... 1.0.1 installed
+    Checked click-option-group (click-option-group>=0.5.5)... 0.5.5 installed
+    Checked click (click>=8.1.3)... 8.1.8 installed
     Installing qwerqwerqwer>=8.1.3... Failed
-    Installing tabulate>=0.9.0... Done
+    Checked tabulate (tabulate)... 0.9.0 installed
 
     The following dependencies could not be installed automatically:
       asdfasdfasdf
