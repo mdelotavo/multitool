@@ -1,5 +1,5 @@
 APP = "multitool"
-__version__ = "0.8.1"
+__version__ = "0.9.0"
 description = "Create and run plugin-based command-line tools."
 long_description = ("Create and run plugin-based command-line tools by dynamically loading Click commands from local or Git-managed plugin repositories.")
 

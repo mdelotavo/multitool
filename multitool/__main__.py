@@ -8,6 +8,8 @@ from multitool import __version__ as version
 from multitool.cls import AliasedGroup
 from multitool.exceptions import wrap_with_exception_handling
 from multitool.plugins.commands import plugins
+from multitool.run.commands import run
+from multitool.bootstrap.commands import bootstrap
 from multitool.utils import (configure_root_logger, for_each_file, load_plugins)
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -21,17 +23,11 @@ def cli(ctx):
     ctx.ensure_object(dict)
 
 
-@click.group(cls=AliasedGroup)
-def run():
-    """Run installed plugin commands."""
-    pass
-
-
 @wrap_with_exception_handling
 def main():
     configure_root_logger(MULTITOOL_LOG_FILE)
 
-    cli_commands = {plugins, run}
+    cli_commands = {plugins, run, bootstrap}
 
     run_commands = {}
 
