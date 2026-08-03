@@ -10,7 +10,7 @@ PROJECT_STRUCTURE = {
   "{app}": {
     "__init__.py": None,
     "__main__.py": None,
-    "cls.py": None,
+    # "cls.py": None,
     "console.py": None,
     "exceptions.py": None,
     "silent.py": None,
