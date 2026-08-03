@@ -5,12 +5,12 @@ import click
 
 from multitool import APP, MULTITOOL_LOG_FILE, MULTITOOL_PLUGINS_DIRECTORY
 from multitool import __version__ as version
+from multitool.bootstrap.commands import bootstrap
 from multitool.cls import AliasedGroup
 from multitool.exceptions import wrap_with_exception_handling
 from multitool.plugins.commands import plugins
 from multitool.run.commands import run
-from multitool.bootstrap.commands import bootstrap
-from multitool.utils import (configure_root_logger, for_each_file, load_plugins)
+from multitool.utils import configure_root_logger, for_each_file, load_plugins
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 

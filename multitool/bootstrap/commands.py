@@ -1,5 +1,7 @@
-import click
 from pathlib import Path
+
+import click
+
 from multitool import console
 from multitool.silent import common_silent_options
 from multitool.utils import mkdir, touch

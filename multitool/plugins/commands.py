@@ -2,33 +2,20 @@ import configparser
 import os
 import shutil
 import stat
+import subprocess
 import sys
 import uuid
-import subprocess
 from importlib.metadata import PackageNotFoundError, version
-from packaging.requirements import Requirement
 from pathlib import Path
 from urllib.parse import urlparse
 
 import click
 from click_option_group import MutuallyExclusiveOptionGroup, optgroup
+from packaging.requirements import Requirement
 
-from multitool import (
-  APP,
-  MULTITOOL_PLUGINS_CONFIG_FILE,
-  MULTITOOL_PLUGINS_DIRECTORY,
-  MULTITOOL_PLUGINS_INIT_FILE,
-  console,
-)
+from multitool import (APP, MULTITOOL_PLUGINS_CONFIG_FILE, MULTITOOL_PLUGINS_DIRECTORY, MULTITOOL_PLUGINS_INIT_FILE, console)
 from multitool.silent import common_silent_options
-from multitool.utils import (
-  mkdir,
-  touch,
-  for_each_file,
-  is_dir,
-  is_file,
-  read_file,
-)
+from multitool.utils import (for_each_file, is_dir, is_file, mkdir, read_file, touch)
 from multitool.verbose import common_verbose_options
 
 try:
