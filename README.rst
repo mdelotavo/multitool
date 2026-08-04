@@ -49,8 +49,9 @@ Usage
       -h, --help     Show this message and exit.
 
     Commands:
-      plugins  Manage plugin repositories.
-      run      Run installed plugin commands.
+      bootstrap  Create the directory structure for a new Python package...
+      plugins    Manage plugin repositories.
+      run        Run installed plugin commands.
 
 ----------------
 Managing plugins
@@ -121,31 +122,45 @@ plugins directory to use it locally.
 Configuring
 ^^^^^^^^^^^
 
-Configure plugin repositories with::
+Add a plugin repository with::
 
-    multitool plugins configure
+    multitool plugins add https://github.com/mdelotavo/multitool-plugins.git
 
-This opens your editor to modify the plugin configuration. After saving your
-changes, apply them with::
+By default, the repository name is used as the source key. To specify your own
+key::
+
+    multitool plugins add https://github.com/mdelotavo/multitool-plugins.git --key example
+
+Remove a configured plugin source by key or URL::
+
+    multitool plugins remove multitool-plugins
+
+    multitool plugins remove https://github.com/mdelotavo/multitool-plugins.git
+
+Apply configuration changes (install new plugins and update existing plugins)
+with::
 
     multitool plugins update
 
-To automatically apply the configuration changes after saving and closing the
-file (install new plugins, update existing plugins, and prune removed plugins),
-use::
+For bulk edits, you can edit the configuration file directly::
+
+    multitool plugins configure
+
+To automatically apply configuration changes after saving and closing the file
+(install new plugins, update existing plugins, and prune removed plugins), use::
 
     multitool plugins configure -a
 
 Example configuration::
 
     [sources]
-    mdelotavo-multitool-plugins = https://github.com/mdelotavo/multitool-plugins.git
+    multitool-plugins = https://github.com/mdelotavo/multitool-plugins.git
 
-After saving, Multitool clones each configured repository into::
+Configured repositories are cloned into::
 
     ~/.multitool/plugins/
 
-You can configure multiple repositories as long as each key is unique.
+Multiple repositories may be configured as long as each source key is unique.
 
 ^^^^^^^^^^
 Installing
@@ -153,14 +168,14 @@ Installing
 
 Install the example plugins::
 
-    echo -e '[sources]\nmdelotavo-multitool-plugins = https://github.com/mdelotavo/multitool-plugins.git' >> ~/.multitool/plugins/config
+    multitool plugins add https://github.com/mdelotavo/multitool-plugins.git
 
     multitool plugins update
-    
+
     multitool plugins show
-    multitool plugins show -n mdelotavo-multitool-plugins
-    multitool plugins show -n mdelotavo-multitool-plugins --show-commit-only
-    multitool plugins show -n mdelotavo-multitool-plugins --show-dependencies-only
+    multitool plugins show -n multitool-plugins
+    multitool plugins show -n multitool-plugins --show-commit-only
+    multitool plugins show -n multitool-plugins --show-dependencies-only
 
     multitool run examples -h
 
@@ -195,7 +210,7 @@ the remaining packages manually. For example::
 
     Updating plugins
     ----------------
-    Updating mdelotavo-multitool-plugins... Done
+    Updating multitool-plugins... Done
     Updating test... Skipped Git pull (not a Git repository)
 
     Checking Python package dependencies
@@ -223,9 +238,19 @@ You can also display a plugin's declared dependencies at any time::
 Pruning
 ^^^^^^^
 
-Remove repositories no longer listed in the configuration::
+To uninstall a plugin repository, first remove it from the configured sources::
+
+    multitool plugins remove multitool-plugins
+
+Then remove any local repositories that are no longer configured::
 
     multitool plugins prune
+
+Alternatively, running::
+
+    multitool plugins configure -a
+
+automatically prunes repositories removed from the configuration.
 
 ^^^^^^^
 Showing
@@ -249,32 +274,6 @@ If a plugin fails to install or load, check the log file::
     ~/.multitool/multitool.log
 
 It contains installation, dependency, and Git-related errors.
-
------------
-Limitations
------------
-
-Plugin command names must be unique across all installed repositories.
-
-To avoid naming conflicts, plugin modules should follow the convention of
-including the repository owner and repository name in the command name.
-
-For example, a repository configured as::
-
-    [sources]
-    mdelotavo-multitool-plugins = https://github.com/mdelotavo/multitool-plugins.git
-
-should expose commands using a unique name such as::
-
-    mdelotavo-multitool-plugins
-
-This reduces the likelihood of collisions when multiple repositories expose
-plugins with the same command name.
-
-If duplicate command names are detected, Multitool will display an error
-prompting you to delete the detected conflicting plugin repositories and, if
-applicable, remove the corresponding remote sources from your plugin
-configuration.
 
 
 .. _`click`: https://click.palletsprojects.com/
